@@ -3,262 +3,157 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#08070d">
-  <title>EclipseSMP — Site officiel</title>
-  <meta name="description" content="Site officiel d'EclipseSMP, serveur Minecraft SMP.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=10">
+  <meta name="theme-color" content="#05030c">
+  <title>EclipseSMP — V2</title>
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
-<div id="intro" class="intro">
-  <div class="intro-stars"></div>
-  <div class="intro-eclipse">
-    <div class="intro-ring"></div>
-    <div class="intro-moon"></div>
-  </div>
-  <div class="intro-copy">
-    <span>SERVEUR MINECRAFT SMP</span>
-    <h1>ECLIPSESMP</h1>
-    <i></i>
-  </div>
-</div>
+  <audio id="ambient" src="ambient.mp3" loop preload="auto"></audio>
 
-<div id="site" class="site-hidden">
-  <div class="site-bg"></div>
-  <div id="stars" class="stars"></div>
+  <!-- CINEMATIC INTRO -->
+  <section id="intro" class="intro">
+    <canvas id="introCanvas"></canvas>
+    <div class="intro-copy" id="introCopy">
+      <div class="intro-badge">ECLIPSESMP • V2</div>
+      <h1>UNE NOUVELLE<br><span>ÈRE COMMENCE.</span></h1>
+      <p>Une expérience Minecraft repensée de zéro.</p>
+      <button id="startIntro" class="btn primary large">DÉMARRER L’EXPÉRIENCE</button>
+      <small>Son recommandé 🎧</small>
+    </div>
+    <button id="skipIntro" class="skip">Passer</button>
+    <div class="intro-progress"><i id="introProgress"></i></div>
+  </section>
 
-  <header class="topbar">
-    <div class="container nav">
-      <a href="#accueil" class="brand">
-        <span class="brand-icon">E</span>
-        <strong>EclipseSMP</strong>
-      </a>
+  <canvas id="space"></canvas>
+  <div class="nebula n1"></div><div class="nebula n2"></div>
 
-      <button id="menuBtn" class="menu-btn" aria-label="Ouvrir le menu">☰</button>
-
-      <nav id="navLinks" class="nav-links">
-        <a href="#accueil">Accueil</a>
-        <a href="#serveur">Serveur</a>
-        <a href="#boutique">Boutique</a>
-        <a href="#regles">Règles</a>
-        <a href="#staff">Staff</a>
-        <a class="discord-link" href="https://discord.gg/4CJzyVE47e" target="_blank" rel="noopener">Discord</a>
-      </nav>
+  <header class="nav">
+    <a class="logo" href="#home"><span class="logo-orb"></span><strong>ECLIPSE</strong><em>SMP</em><b>V2</b></a>
+    <nav class="navlinks">
+      <a href="#home">Accueil</a>
+      <a href="#features">Serveur</a>
+      <a href="#shop">Boutique</a>
+      <a href="#crates">Clés</a>
+      <a href="#rules">Règles</a>
+    </nav>
+    <div class="actions">
+      <button id="accountBtn" class="iconbtn" title="Compte">👤</button>
+      <button id="soundBtn" class="iconbtn" title="Musique">♫</button>
+      <button id="settingsBtn" class="iconbtn" title="Paramètres">⚙</button>
     </div>
   </header>
 
   <main>
-    <section id="accueil" class="container hero">
-      <div class="hero-copy reveal">
-        <div class="eyebrow">SERVEUR MINECRAFT SMP</div>
-        <h1>Bienvenue sur <span>EclipseSMP</span></h1>
-        <p>Économie, gemmes, caisses, PvP, progression, événements et équipements exclusifs.</p>
-
-        <div class="hero-actions">
-          <button id="copyIp" class="btn btn-primary">
-            Jouer maintenant
-            <small>play.eclipsesmp.fr</small>
-          </button>
-          <a class="btn btn-secondary" href="https://discord.gg/4CJzyVE47e" target="_blank" rel="noopener">Rejoindre le Discord</a>
+    <section id="home" class="hero">
+      <div class="hero-left reveal">
+        <div class="eyebrow">🌑 JAVA + BEDROCK • SMP FR/EN</div>
+        <h2>LE SMP QUI ENTRE<br><span>DANS UNE NOUVELLE DIMENSION.</span></h2>
+        <p>Économie, PvP, bases, marché, clés, progression, événements et contenu custom dans une identité galactique entièrement repensée.</p>
+        <div class="hero-btns">
+          <button id="copyIp" class="btn primary">COPIER L’IP</button>
+          <a class="btn ghost" target="_blank" rel="noopener" href="https://discord.gg/vx8KR6wtyQ">REJOINDRE DISCORD</a>
         </div>
-
-        <div class="chips">
-          <span>⚔ PvP</span>
-          <span>💰 Économie</span>
-          <span>💎 Gemmes</span>
-          <span>🎁 Caisses</span>
-          <span>🏠 Homes</span>
+        <div class="serverline">
+          <span><i></i> EN DÉVELOPPEMENT</span>
+          <b>play.eclipsesmp.fr</b>
+          <span>V2</span>
         </div>
       </div>
-
-      <div class="solar-card reveal delay">
-        <div class="solar-system">
-          <div class="solar-glow"></div>
-          <div class="sun-core">E</div>
-          <div class="orbit orbit-1"><i class="planet mercury"></i></div>
-          <div class="orbit orbit-2"><i class="planet earth"></i></div>
-          <div class="orbit orbit-3"><i class="planet amethyst-planet"></i></div>
-          <div class="orbit orbit-4"><i class="planet saturn"></i></div>
-        </div>
-        <div class="solar-caption">
-          <strong>EclipseSMP Universe</strong>
-          <span>Un monde en mouvement.</span>
-        </div>
+      <div class="hero-art reveal">
+        <div class="planet"></div>
+        <div class="orbit o1"></div>
+        <div class="orbit o2"></div>
+        <div class="orb m1"></div><div class="orb m2"></div>
+        <div class="hero-glow"></div>
       </div>
     </section>
 
-    <section id="serveur" class="container section">
-      <div class="section-head reveal">
-        <div class="eyebrow">LE SERVEUR</div>
-        <h2>Un SMP qui donne envie de rester</h2>
-        <p>Une progression longue, des récompenses utiles et un univers visuel propre à EclipseSMP.</p>
-      </div>
-
+    <section id="features" class="section">
+      <div class="section-head reveal"><small>LE SERVEUR</small><h3>Construit pour être <span>plus grand.</span></h3></div>
       <div class="feature-grid">
-        <article class="feature-card reveal"><span>💰</span><h3>Économie</h3><p>Shop, ventes, hôtel des ventes et progression.</p></article>
-        <article class="feature-card reveal"><span>💎</span><h3>Gemmes</h3><p>Une monnaie spéciale pour le contenu rare.</p></article>
-        <article class="feature-card reveal"><span>🎁</span><h3>Caisses</h3><p>Rare, Épique, Légendaire, Améthyste, Eclipse, Nova et Spawner.</p></article>
-        <article class="feature-card reveal"><span>⚔️</span><h3>PvP</h3><p>Kills, événements et récompenses.</p></article>
-        <article class="feature-card reveal"><span>🏠</span><h3>Exploration</h3><p>Homes, RTP et exploration des dimensions.</p></article>
-        <article class="feature-card reveal"><span>🛡️</span><h3>Protection</h3><p>Des systèmes adaptés aux bases et aux joueurs.</p></article>
+        <article class="card reveal"><span>⚔️</span><h4>PvP & Rivalités</h4><p>Crée ton équipe, affronte d'autres joueurs et construis ta réputation.</p></article>
+        <article class="card reveal"><span>💰</span><h4>Économie</h4><p>/shop, /sell, /ah, échanges, gemmes et économie pensée pour durer.</p></article>
+        <article class="card reveal"><span>🌍</span><h4>Exploration</h4><p>RTP, bases secrètes, mondes à explorer et progression constante.</p></article>
+        <article class="card reveal"><span>🧰</span><h4>Outils Custom</h4><p>Améthyste, Eclipse et Nova avec outils spéciaux et progression premium.</p></article>
+        <article class="card reveal"><span>🎁</span><h4>Clés & Récompenses</h4><p>Rare, Épique, Légendaire, Spawn, Spawner et clés Premium.</p></article>
+        <article class="card reveal"><span>🎉</span><h4>Events</h4><p>Événements, récompenses et nouveautés régulières pour garder le serveur vivant.</p></article>
       </div>
     </section>
 
-    <section id="boutique" class="container section">
-      <div class="section-head reveal">
-        <div class="eyebrow">BOUTIQUE</div>
-        <h2>Des récompenses qui donnent envie</h2>
-        <p>Les paiements sont désactivés pour l'instant. Tu peux déjà consulter chaque clé en détail avec une présentation complète et animée.</p>
+    <section id="shop" class="section">
+      <div class="section-head reveal"><small>BOUTIQUE</small><h3>Choisis ton <span>rang.</span></h3></div>
+      <div class="pricing">
+        <article class="rank reveal"><div class="rank-top"><span>VIP</span><b>3,99 €</b></div><p>Avantages essentiels et badge VIP.</p><button disabled>Bientôt</button></article>
+        <article class="rank featured reveal"><div class="popular">POPULAIRE</div><div class="rank-top"><span>ECLIPSE</span><b>7,99 €</b></div><p>Bonus améliorés et identité Eclipse.</p><button disabled>Bientôt</button></article>
+        <article class="rank reveal"><div class="rank-top"><span>NOVA</span><b>11,99 €</b></div><p>Le niveau premium le plus élevé.</p><button disabled>Bientôt</button></article>
       </div>
+    </section>
 
+    <section id="crates" class="section">
+      <div class="section-head reveal"><small>CLÉS</small><h3>Découvre ce qu’il y a <span>à l’intérieur.</span></h3></div>
       <div class="tabs reveal">
-        <button class="tab active" data-tab="all">Tout</button>
-        <button class="tab" data-tab="grades">Grades</button>
-        <button class="tab" data-tab="premium">Clés Premium</button>
-        <button class="tab" data-tab="classic">Clés Classiques</button>
+        <button class="tab active" data-tab="classic">Classiques</button>
+        <button class="tab" data-tab="premium">Premium</button>
+        <button class="tab" data-tab="spawn">Spawn</button>
         <button class="tab" data-tab="spawner">Spawner</button>
-        <button class="tab" data-tab="gems">Gemmes</button>
-        <button class="tab" data-tab="services">Services</button>
       </div>
-
-      <div class="products">
-        <article class="product-card reveal" data-cat="grades">
-          <div class="product-visual vip">👑</div>
-          <div class="product-body"><span class="product-tag">GRADE</span><h3>VIP</h3><p>Premier grade premium.</p><strong>3,99 €</strong><button class="disabled-btn" disabled>Bientôt disponible</button></div>
-        </article>
-        <article class="product-card reveal" data-cat="grades">
-          <div class="product-visual eclipse-grade">🌘</div>
-          <div class="product-body"><span class="product-tag">GRADE</span><h3>Eclipse</h3><p>Grade premium Eclipse.</p><strong>7,99 €</strong><button class="disabled-btn" disabled>Bientôt disponible</button></div>
-        </article>
-        <article class="product-card reveal" data-cat="grades">
-          <div class="product-visual nova-grade">✨</div>
-          <div class="product-body"><span class="product-tag">GRADE</span><h3>Nova</h3><p>Grade premium supérieur.</p><strong>11,99 €</strong><button class="disabled-btn" disabled>Bientôt disponible</button></div>
-        </article>
-
-        <article class="product-card reveal" data-cat="premium">
-          <div class="product-visual amethyst-key">💜</div>
-          <div class="product-body"><span class="product-tag">CLÉ PREMIUM</span><h3>Clé Améthyste</h3><p>Outils et équipement Améthyste.</p><strong>1,99 €</strong><button class="view-btn" data-key="amethyst">Découvrir la clé →</button></div>
-        </article>
-        <article class="product-card reveal" data-cat="premium">
-          <div class="product-visual eclipse-key">🌘</div>
-          <div class="product-body"><span class="product-tag">CLÉ PREMIUM</span><h3>Clé Eclipse</h3><p>Équipement et outils Eclipse.</p><strong>2,25 €</strong><button class="view-btn" data-key="eclipse">Découvrir la clé →</button></div>
-        </article>
-        <article class="product-card reveal" data-cat="premium">
-          <div class="product-visual nova-key">⭐</div>
-          <div class="product-body"><span class="product-tag">CLÉ PREMIUM</span><h3>Clé Nova</h3><p>La clé premium la plus puissante.</p><strong>2,99 €</strong><button class="view-btn" data-key="nova">Découvrir la clé →</button></div>
-        </article>
-
-        <article class="product-card reveal" data-cat="classic">
-          <div class="product-visual rare">🔹</div>
-          <div class="product-body"><span class="product-tag">CLÉ CLASSIQUE</span><h3>Clé Rare</h3><p>Loot utile pour progresser.</p><strong>0,76 €</strong><button class="view-btn" data-key="rare">Découvrir la clé →</button></div>
-        </article>
-        <article class="product-card reveal" data-cat="classic">
-          <div class="product-visual epic">🔥</div>
-          <div class="product-body"><span class="product-tag">CLÉ CLASSIQUE</span><h3>Clé Épique</h3><p>Loot avancé et Netherite.</p><strong>1,10 €</strong><button class="view-btn" data-key="epic">Découvrir la clé →</button></div>
-        </article>
-        <article class="product-card reveal" data-cat="classic">
-          <div class="product-visual legendary">🏆</div>
-          <div class="product-body"><span class="product-tag">CLÉ CLASSIQUE</span><h3>Clé Légendaire</h3><p>Gros loot et récompenses rares.</p><strong>1,56 €</strong><button class="view-btn" data-key="legendary">Découvrir la clé →</button></div>
-        </article>
-
-        <article class="product-card reveal" data-cat="spawner">
-          <div class="product-visual spawner">🧿</div>
-          <div class="product-body"><span class="product-tag">CLÉ SPAWNER</span><h3>Clé Spawner</h3><p>Un spawner aléatoire selon sa rareté.</p><strong>1,99 €</strong><button class="view-btn" data-key="spawner">Voir les probabilités →</button></div>
-        </article>
-
-        <article class="product-card reveal" data-cat="gems">
-          <div class="product-visual gems">💎</div>
-          <div class="product-body"><span class="product-tag">GEMMES</span><h3>500 Gemmes</h3><p>Pack de gemmes.</p><strong>2,25 €</strong><button class="disabled-btn" disabled>Bientôt disponible</button></div>
-        </article>
-        <article class="product-card reveal" data-cat="gems">
-          <div class="product-visual gems">💎</div>
-          <div class="product-body"><span class="product-tag">GEMMES</span><h3>1 500 Gemmes</h3><p>Pack de gemmes.</p><strong>5,99 €</strong><button class="disabled-btn" disabled>Bientôt disponible</button></div>
-        </article>
-        <article class="product-card reveal" data-cat="gems">
-          <div class="product-visual gems">💎</div>
-          <div class="product-body"><span class="product-tag">GEMMES</span><h3>5 000 Gemmes</h3><p>Gros pack de gemmes.</p><strong>12,99 €</strong><button class="disabled-btn" disabled>Bientôt disponible</button></div>
-        </article>
-
-        <article class="product-card reveal" data-cat="services">
-          <div class="product-visual unban">🔓</div>
-          <div class="product-body"><span class="product-tag">SERVICE</span><h3>Unban</h3><p>Sous réserve d'éligibilité.</p><strong>5,00 €</strong><button class="disabled-btn" disabled>Bientôt disponible</button></div>
-        </article>
-        <article class="product-card reveal" data-cat="services">
-          <div class="product-visual demute">🔊</div>
-          <div class="product-body"><span class="product-tag">SERVICE</span><h3>Demute</h3><p>Sous réserve d'éligibilité.</p><strong>0,60 €</strong><button class="disabled-btn" disabled>Bientôt disponible</button></div>
-        </article>
-      </div>
+      <div id="crateGrid" class="crate-grid reveal"></div>
     </section>
 
-    <section id="regles" class="container section">
-      <div class="section-head reveal"><div class="eyebrow">RÈGLES</div><h2>Règles principales</h2></div>
+    <section id="rules" class="section">
+      <div class="section-head reveal"><small>RÈGLES / RULES</small><h3>Simple, clair, <span>équitable.</span></h3></div>
       <div class="rules">
-        <div class="rule reveal"><b>01</b><p>Pas de triche, x-ray ou client interdit.</p></div>
-        <div class="rule reveal"><b>02</b><p>Pas d'exploitation volontaire de bugs.</p></div>
-        <div class="rule reveal"><b>03</b><p>Respect des joueurs et du staff.</p></div>
-        <div class="rule reveal"><b>04</b><p>Pas de spam ni publicité.</p></div>
-      </div>
-    </section>
-
-    <section id="staff" class="container section">
-      <div class="section-head reveal"><div class="eyebrow">STAFF</div><h2>L'équipe EclipseSMP</h2></div>
-      <div class="staff-grid">
-        <article class="staff-card reveal"><div>F</div><h3>Fondateur</h3><p>Direction</p></article>
-        <article class="staff-card reveal"><div>R</div><h3>Responsable</h3><p>Gestion du staff</p></article>
-        <article class="staff-card reveal"><div>A</div><h3>Administrateur</h3><p>Administration</p></article>
-        <article class="staff-card reveal"><div>M</div><h3>Modérateur</h3><p>Modération</p></article>
-        <article class="staff-card reveal"><div>A</div><h3>Auxiliaire</h3><p>Aide aux joueurs</p></article>
-      </div>
-    </section>
-
-    <section class="container section">
-      <div class="cta reveal">
-        <div><div class="eyebrow">DISCORD</div><h2>Rejoins la communauté</h2><p>Actualités, annonces et mises à jour.</p></div>
-        <a class="btn btn-primary" href="https://discord.gg/4CJzyVE47e" target="_blank" rel="noopener">Rejoindre le Discord</a>
+        <details class="rule reveal"><summary>⚔️ PvP</summary><p>🇫🇷 PvP autorisé, spawn-kill abusif interdit.<br>🇬🇧 PvP allowed, excessive spawn-killing forbidden.</p></details>
+        <details class="rule reveal"><summary>🏰 Bases & Raiding</summary><p>🇫🇷 Pillage autorisé, destruction gratuite interdite.<br>🇬🇧 Raiding allowed, pointless destruction forbidden.</p></details>
+        <details class="rule reveal"><summary>🚫 Cheats</summary><p>🇫🇷 X-Ray, KillAura, Reach, Fly, Speed et exploits interdits.<br>🇬🇧 X-Ray, KillAura, Reach, Fly, Speed and exploits are forbidden.</p></details>
+        <details class="rule reveal"><summary>💬 Discord</summary><p>🇫🇷 Pas de spam, harcèlement ou publicité non autorisée.<br>🇬🇧 No spam, harassment or unauthorized advertising.</p></details>
       </div>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <div><strong>EclipseSMP</strong><p>Serveur Minecraft SMP communautaire.</p></div>
-      <div class="footer-links"><a href="#accueil">Accueil</a><a href="#boutique">Boutique</a><a href="#regles">Règles</a><a href="#staff">Staff</a><a href="https://discord.gg/4CJzyVE47e" target="_blank" rel="noopener">Discord</a></div>
-    </div>
+  <footer>
+    <div><b>EclipseSMP V2</b><span>Une communauté. Un monde. Une éclipse.</span></div>
+    <a href="https://discord.gg/vx8KR6wtyQ" target="_blank" rel="noopener">Discord</a>
   </footer>
 
-  <div id="toast" class="toast">IP copiée !</div>
-
-  <div id="drawer" class="drawer" aria-hidden="true">
-    <div class="drawer-backdrop"></div>
-    <section class="drawer-panel" role="dialog" aria-modal="true">
-      <div class="drawer-topbar">
-        <button id="drawerBack" class="drawer-back">← Retour à la boutique</button>
-        <button id="drawerClose" class="drawer-close">✕</button>
-      </div>
-
-      <div class="crate-header">
-        <div id="crateGlow" class="crate-glow"></div>
-        <div id="crateIcon" class="crate-icon">🎁</div>
-        <div class="crate-title-wrap">
-          <span id="crateTier" class="crate-tier">CLÉ</span>
-          <h2 id="crateTitle">Clé</h2>
-          <p id="crateDesc"></p>
-        </div>
-      </div>
-
-      <div class="drawer-content">
-        <div class="drawer-content-head">
-          <div><div class="eyebrow">RÉCOMPENSES</div><h3>Tout ce que tu peux obtenir</h3></div>
-          <span id="lootCount" class="loot-count"></span>
-        </div>
-        <div id="lootGrid" class="loot-grid"></div>
-      </div>
-    </section>
+  <!-- CRATE MODAL -->
+  <div id="crateModal" class="modal">
+    <div class="shade" data-close="crate"></div>
+    <div class="modal-card">
+      <button class="close" data-close="crate">×</button>
+      <div id="crateIcon" class="modal-icon">🗝️</div>
+      <small>CONTENU DE LA CLÉ</small>
+      <h3 id="crateTitle"></h3>
+      <div id="cratePrice" class="modal-price"></div>
+      <div id="crateBody"></div>
+    </div>
   </div>
-</div>
 
-<script src="script.js?v=10"></script>
+  <!-- ACCOUNT -->
+  <div id="accountModal" class="modal">
+    <div class="shade" data-close="account"></div>
+    <div class="modal-card">
+      <button class="close" data-close="account">×</button>
+      <div class="account-logo">◐</div>
+      <small>ECLIPSESMP ID</small>
+      <h3>Compte EclipseSMP</h3>
+      <p class="muted">La connexion Microsoft nécessite ton Client ID Microsoft dans les paramètres.</p>
+      <button id="msLogin" class="msbtn">▦ Continuer avec Microsoft</button>
+      <p id="msStatus" class="status"></p>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <aside id="settings" class="settings">
+    <div class="settings-head"><div><small>ECLIPSESMP</small><h3>Paramètres</h3></div><button id="closeSettings" class="close static">×</button></div>
+    <div class="setting"><div><b>Musique</b><span>Ambiance du site</span></div><label class="switch"><input id="musicToggle" type="checkbox"><i></i></label></div>
+    <div class="setting block"><div class="range-head"><b>Volume</b><span id="volumeLabel">35%</span></div><input id="volume" type="range" min="0" max="100" value="35"></div>
+    <div class="setting block"><b>Client ID Microsoft</b><span>À créer dans Microsoft Entra pour activer la vraie connexion.</span><input id="clientId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"><button id="saveClient" class="btn ghost small">Enregistrer</button></div>
+    <div class="setting block"><button id="replay" class="btn ghost full">▶ Rejouer l’intro</button></div>
+  </aside>
+  <div id="settingsShade" class="settings-shade"></div>
+
+  <div id="toast" class="toast"></div>
+  <script src="script.js?v=15"></script>
 </body>
 </html>
