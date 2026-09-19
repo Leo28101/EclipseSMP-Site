@@ -5,11 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#05030c">
   <title>EclipseSMP — V2</title>
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
 </head>
 <body>
   <audio id="ambient" src="ambient.mp3" loop preload="auto"></audio>
-
   <!-- CINEMATIC INTRO -->
   <section id="intro" class="intro">
     <canvas id="introCanvas"></canvas>
@@ -23,34 +22,33 @@
     <button id="skipIntro" class="skip">Passer</button>
     <div class="intro-progress"><i id="introProgress"></i></div>
   </section>
-
   <canvas id="space"></canvas>
   <div class="nebula n1"></div><div class="nebula n2"></div>
-
   <header class="nav">
     <a class="logo" href="#home"><span class="logo-orb"></span><strong>ECLIPSE</strong><em>SMP</em><b>V2</b></a>
     <nav class="navlinks">
-      <a href="#home">Accueil</a>
-      <a href="#features">Serveur</a>
-      <a href="#shop">Boutique</a>
-      <a href="#crates">Clés</a>
-      <a href="#rules">Règles</a>
+      <a href="#home" data-i18n="nav_home">Accueil</a>
+      <a href="#features" data-i18n="nav_server">Serveur</a>
+      <a href="#leaderboard" data-i18n="nav_leaderboard">Classement</a>
+      <a href="#shop" data-i18n="nav_shop">Boutique</a>
+      <a href="#crates" data-i18n="nav_keys">Clés</a>
+      <a href="#rules" data-i18n="nav_rules">Règles</a>
     </nav>
     <div class="actions">
+      <button id="langBtn" class="langbtn" title="Langue / Language">FR</button>
       <button id="accountBtn" class="iconbtn" title="Compte">👤</button>
-      <button id="soundBtn" class="iconbtn" title="Musique">♫</button>
+      <button id="soundBtn" class="iconbtn" title="Musique">🔇</button>
       <button id="settingsBtn" class="iconbtn" title="Paramètres">⚙</button>
     </div>
   </header>
-
   <main>
     <section id="home" class="hero">
       <div class="hero-left reveal">
-        <div class="eyebrow">🌑 JAVA + BEDROCK • SMP FR/EN</div>
-        <h2>LE SMP QUI ENTRE<br><span>DANS UNE NOUVELLE DIMENSION.</span></h2>
-        <p>Économie, PvP, bases, marché, clés, progression, événements et contenu custom dans une identité galactique entièrement repensée.</p>
+        <div class="eyebrow" data-i18n="hero_eyebrow">🌑 JAVA + BEDROCK • SMP FR/EN</div>
+        <h2 data-i18n-html="hero_title">LE SMP QUI ENTRE<br><span>DANS UNE NOUVELLE DIMENSION.</span></h2>
+        <p data-i18n="hero_desc">Économie, PvP, bases, marché, clés, progression, événements et contenu custom dans une identité galactique entièrement repensée.</p>
         <div class="hero-btns">
-          <button id="copyIp" class="btn primary">COPIER L’IP</button>
+          <button id="copyIp" class="btn primary" data-i18n="copy_ip">COPIER L’IP</button>
           <a class="btn ghost" target="_blank" rel="noopener" href="https://discord.gg/vx8KR6wtyQ">REJOINDRE DISCORD</a>
         </div>
         <div class="serverline">
@@ -69,7 +67,7 @@
     </section>
 
     <section id="features" class="section">
-      <div class="section-head reveal"><small>LE SERVEUR</small><h3>Construit pour être <span>plus grand.</span></h3></div>
+      <div class="section-head reveal"><small data-i18n="section_server">LE SERVEUR</small><h3 data-i18n-html="server_title">Construit pour être <span>plus grand.</span></h3></div>
       <div class="feature-grid">
         <article class="card reveal"><span>⚔️</span><h4>PvP & Rivalités</h4><p>Crée ton équipe, affronte d'autres joueurs et construis ta réputation.</p></article>
         <article class="card reveal"><span>💰</span><h4>Économie</h4><p>/shop, /sell, /ah, échanges, gemmes et économie pensée pour durer.</p></article>
@@ -80,8 +78,25 @@
       </div>
     </section>
 
+    <!-- AJOUT: TABLEAU SCORE, sans changer le design du site -->
+    <section id="leaderboard" class="section">
+      <div class="section-head reveal"><small data-i18n="section_live">CLASSEMENT LIVE</small><h3 data-i18n-html="leader_title">Les meilleurs <span>joueurs.</span></h3></div>
+      <div class="score-tabs reveal">
+        <button class="score-tab active" data-score="money" data-i18n="money">Argent</button>
+        <button class="score-tab" data-score="shards" data-i18n="gems">Gemmes</button>
+        <button class="score-tab" data-score="kills">Kills</button>
+        <button class="score-tab" data-score="deaths" data-i18n="deaths">Morts</button>
+        <button class="score-tab" data-score="playtime" data-i18n="time">Temps</button>
+      </div>
+      <div class="scoreboard reveal">
+        <div class="score-head"><span>#</span><span data-i18n="player">Joueur</span><span data-i18n="rank">Grade</span><span data-i18n="value">Valeur</span></div>
+        <div id="scoreRows"><div class="score-row"><span>—</span><span>Connexion à l'API...</span><span>—</span><span>—</span></div></div>
+      </div>
+      <p id="scoreStatus" class="score-status" data-i18n="backend_wait">En attente du backend Render.</p>
+    </section>
+
     <section id="shop" class="section">
-      <div class="section-head reveal"><small>BOUTIQUE</small><h3>Choisis ton <span>rang.</span></h3></div>
+      <div class="section-head reveal"><small data-i18n="section_shop">BOUTIQUE</small><h3 data-i18n-html="shop_title">Choisis ton <span>rang.</span></h3></div>
       <div class="pricing">
         <article class="rank reveal"><div class="rank-top"><span>VIP</span><b>3,99 €</b></div><p>Avantages essentiels et badge VIP.</p><button disabled>Bientôt</button></article>
         <article class="rank featured reveal"><div class="popular">POPULAIRE</div><div class="rank-top"><span>ECLIPSE</span><b>7,99 €</b></div><p>Bonus améliorés et identité Eclipse.</p><button disabled>Bientôt</button></article>
@@ -90,7 +105,7 @@
     </section>
 
     <section id="crates" class="section">
-      <div class="section-head reveal"><small>CLÉS</small><h3>Découvre ce qu’il y a <span>à l’intérieur.</span></h3></div>
+      <div class="section-head reveal"><small data-i18n="section_keys">CLÉS</small><h3 data-i18n-html="keys_title">Découvre ce qu’il y a <span>à l’intérieur.</span></h3></div>
       <div class="tabs reveal">
         <button class="tab active" data-tab="classic">Classiques</button>
         <button class="tab" data-tab="premium">Premium</button>
@@ -101,7 +116,7 @@
     </section>
 
     <section id="rules" class="section">
-      <div class="section-head reveal"><small>RÈGLES / RULES</small><h3>Simple, clair, <span>équitable.</span></h3></div>
+      <div class="section-head reveal"><small data-i18n="section_rules">RÈGLES / RULES</small><h3 data-i18n-html="rules_title">Simple, clair, <span>équitable.</span></h3></div>
       <div class="rules">
         <details class="rule reveal"><summary>⚔️ PvP</summary><p>🇫🇷 PvP autorisé, spawn-kill abusif interdit.<br>🇬🇧 PvP allowed, excessive spawn-killing forbidden.</p></details>
         <details class="rule reveal"><summary>🏰 Bases & Raiding</summary><p>🇫🇷 Pillage autorisé, destruction gratuite interdite.<br>🇬🇧 Raiding allowed, pointless destruction forbidden.</p></details>
@@ -129,31 +144,65 @@
     </div>
   </div>
 
-  <!-- ACCOUNT -->
+  <!-- COMPTE: remplacé uniquement ici -->
   <div id="accountModal" class="modal">
     <div class="shade" data-close="account"></div>
     <div class="modal-card">
       <button class="close" data-close="account">×</button>
-      <div class="account-logo">◐</div>
-      <small>ECLIPSESMP ID</small>
-      <h3>Compte EclipseSMP</h3>
-      <p class="muted">La connexion Microsoft nécessite ton Client ID Microsoft dans les paramètres.</p>
-      <button id="msLogin" class="msbtn">▦ Continuer avec Microsoft</button>
-      <p id="msStatus" class="status"></p>
+
+      <div id="authArea">
+        <div class="account-logo">◐</div>
+        <small>ECLIPSESMP ID</small>
+        <h3>Compte EclipseSMP</h3>
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-auth="login" data-i18n="login">Connexion</button>
+          <button class="auth-tab" data-auth="register" data-i18n="register">Créer un compte</button>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+          <label>Email<input id="loginEmail" type="email" required></label>
+          <label>Mot de passe<input id="loginPassword" type="password" required></label>
+          <button class="btn primary full" type="submit" data-i18n="login_btn">SE CONNECTER</button>
+          <p id="loginStatus" class="status"></p>
+        </form>
+
+        <form id="registerForm" class="auth-form hidden">
+          <label>Email<input id="registerEmail" type="email" required></label>
+          <label>Pseudo Minecraft<input id="registerMinecraft" type="text" required></label>
+          <label>Mot de passe<input id="registerPassword" type="password" minlength="8" required></label>
+          <label>Confirmer<input id="registerPassword2" type="password" minlength="8" required></label>
+          <button class="btn primary full" type="submit" data-i18n="register_btn">CRÉER MON COMPTE</button>
+          <p id="registerStatus" class="status"></p>
+        </form>
+      </div>
+
+      <div id="profileArea" class="hidden">
+        <div class="account-logo">◐</div>
+        <small>MON PROFIL</small>
+        <h3 id="profileName">Joueur</h3>
+        <div class="profile-grid">
+          <div><span>Grade</span><b id="profileRank">default</b></div>
+          <div><span>Argent</span><b id="profileMoney">0</b></div>
+          <div><span>Gemmes</span><b id="profileShards">0</b></div>
+          <div><span>Kills</span><b id="profileKills">0</b></div>
+          <div><span>Morts</span><b id="profileDeaths">0</b></div>
+          <div><span>Temps</span><b id="profilePlaytime">0h</b></div>
+        </div>
+        <button id="logoutBtn" class="btn ghost full" data-i18n="logout">SE DÉCONNECTER</button>
+      </div>
     </div>
   </div>
 
-  <!-- SETTINGS -->
+  <!-- SETTINGS conservés, sauf Microsoft Client ID retiré -->
   <aside id="settings" class="settings">
     <div class="settings-head"><div><small>ECLIPSESMP</small><h3>Paramètres</h3></div><button id="closeSettings" class="close static">×</button></div>
     <div class="setting"><div><b>Musique</b><span>Ambiance du site</span></div><label class="switch"><input id="musicToggle" type="checkbox"><i></i></label></div>
     <div class="setting block"><div class="range-head"><b>Volume</b><span id="volumeLabel">35%</span></div><input id="volume" type="range" min="0" max="100" value="35"></div>
-    <div class="setting block"><b>Client ID Microsoft</b><span>À créer dans Microsoft Entra pour activer la vraie connexion.</span><input id="clientId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"><button id="saveClient" class="btn ghost small">Enregistrer</button></div>
     <div class="setting block"><button id="replay" class="btn ghost full">▶ Rejouer l’intro</button></div>
   </aside>
-  <div id="settingsShade" class="settings-shade"></div>
 
+  <div id="settingsShade" class="settings-shade"></div>
   <div id="toast" class="toast"></div>
-  <script src="script.js?v=15"></script>
+  <script src="script.js?v=16"></script>
 </body>
 </html>
