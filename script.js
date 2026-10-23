@@ -1,7 +1,7 @@
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.classList.remove("show"),2200)};
 // API Render: remplace seulement cette URL plus tard par ton vrai lien Render.
-const API_BASE="https://TON-API.onrender.com/api";
+const API_BASE="https://eclipsesmp-site.onrender.com/api"; // À remplacer par une URL de backend réelle. Aucun compte ni paiement actif sans backend.
 const TOKEN_KEY="eclipse_token";
 
 // background
@@ -126,6 +126,8 @@ function applyLanguage(lang){
   currentLang=lang;localStorage.setItem("eclipseLang",lang);
   $("#langBtn").textContent=lang.toUpperCase();
   document.documentElement.lang=lang;
+  $$(`[data-shop-${lang}]`).forEach(el=>el.textContent=el.getAttribute(`data-shop-${lang}`));
+  if(window.eclipseCartReady) { renderCrates();refreshCart(); }
   $$("[data-i18n]").forEach(el=>{const k=el.dataset.i18n;if(translations[lang][k])el.textContent=translations[lang][k]});
   $$("[data-i18n-html]").forEach(el=>{const k=el.dataset.i18nHtml;if(translations[lang][k])el.innerHTML=translations[lang][k]});
 }
@@ -135,28 +137,78 @@ applyLanguage(currentLang);
 // reveals
 const obs=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting&&e.target.classList.add("visible")),{threshold:.12});$$(".reveal").forEach(e=>obs.observe(e));
 // copy ip
-$("#copyIp").onclick=async()=>{try{await navigator.clipboard.writeText("play.eclipsesmp.fr")}catch(e){}toast("IP copiée : play.eclipsesmp.fr")};
+$("#copyIp").onclick=async()=>{try{await navigator.clipboard.writeText("eclipsesmp.eu")}catch(e){}toast("IP copiée : eclipsesmp.eu")};
 
-// crates
-const data={
- classic:[
- {i:"🔹",n:"Clé Rare",p:"0,76 €",d:"Argent, gemmes, minerais, équipement et spawner basique.",r:["5 000–15 000 $","100–300 Gemmes","Fer / Or / Diamant","16–32 Obsidienne","Épée diamant enchantée","Pioche diamant Efficacité IV / Solidité III","8 Pommes dorées","Spawner Poulet / Mouton / Zombie"]},
- {i:"🟣",n:"Clé Épique",p:"1,10 €",d:"Récompenses améliorées, Netherite et spawners moyens.",r:["20 000–50 000 $","400–800 Gemmes","16–32 Diamants","8–16 Débris antiques","Épée Netherite Tranchant V","Pioche Netherite Efficacité V / Fortune III","16 Pommes dorées","1 Totem","Spawner Squelette / Araignée / Vache / Zombie Piglin"]},
- {i:"🟡",n:"Clé Légendaire",p:"1,56 €",d:"Très gros lots et spawners rares.",r:["75 000–150 000 $","1 000–2 000 Gemmes","32–64 Diamants","16–32 Débris antiques","Épée Netherite très enchantée","Pioche Netherite Fortune IV","Armure Netherite Protection IV","2–4 Totems","16 Pommes dorées enchantées","Spawner Blaze / Creeper / Golem de fer","Petite chance : Clé Améthyste"]}
- ],
- premium:[
- {i:"💜",n:"Clé Améthyste",p:"1,99 €",d:"Outils custom Améthyste.",r:["Pioche 3×3","Pelle 3×3","Hache TreeCapitator","Houe 5×5","Capture Ball","Bonus argent / gemmes"]},
- {i:"🌑",n:"Clé Eclipse",p:"2,25 €",d:"Stuff et outils Eclipse.",r:["Armure Eclipse","Pioche 5×5","Pelle 5×5","Hache 50 blocs","Houe 5×5","Capture Ball","Épée Eclipse"]},
- {i:"💠",n:"Clé Nova",p:"2,99 €",d:"Le meilleur contenu premium.",r:["Armure Nova Protection VI","Bottes Chute amortie VII","Pioche 6×6","Pelle 6×6","Hache Nova","Houe 6×6","Capture Ball","Épée Nova"]}
- ],
- spawn:{i:"🏛️",n:"Clé de Spawn",p:"1,99 €",d:"Une clé spéciale disponible depuis le spawn.",r:["Récompenses exclusives du spawn","Argent et gemmes","Objets rares","Équipement enchanté","Chance de gagner une autre clé"]},
- spawner:{i:"🧬",n:"Clé Spawner",p:"Spawner",d:"Spawners avec probabilités visibles.",c:[["Mouton",18],["Poulet",16],["Vache",14],["Zombie",12],["Araignée",10],["Squelette",10],["Zombie Piglin",8],["Blaze",6],["Creeper",4],["Golem de fer",2]]}
+// Boutique: les anciens types de clés ont été volontairement retirés.
+const products = {
+ vip:{name:"VIP · 30 jours",price:3.99,icon:"✦"},
+ eclipse:{name:"Eclipse · 30 jours",price:7.99,icon:"◐"},
+ nova:{name:"Nova · 30 jours",price:11.99,icon:"✧"},
+ spawner:{name:"Clé Spawner",price:null,icon:"🧬",desc:"Spawners et récompenses de farm."},
+ keyEclipse:{name:"Clé Eclipse",price:2.25,icon:"🌑",desc:"Récompenses Eclipse."},
+ keyNova:{name:"Clé Nova",price:2.99,icon:"💠",desc:"Récompenses Nova."},
+ premium:{name:"Battle Pass Premium",price:null,icon:"⚔",desc:"Accès Premium pour la saison en cours. Tarif en euros à confirmer."},
+ unban:{name:"Unban",price:7.00,icon:"🔓",desc:"Demande de débanissement — soumise à validation du staff."},
+ unmute:{name:"Unmute",price:2.00,icon:"🔊",desc:"Demande de retrait de mute — soumise à validation du staff."}
 };
-const grid=$("#crateGrid"),modal=$("#crateModal");
-function card(c,k){return `<article class="crate-card"><div class="ci">${c.i}</div><h4>${c.n}</h4><div class="price">${c.p}</div><p>${c.d}</p><button data-key="${k}">🔎 Voir le contenu</button></article>`}
-function render(t){grid.innerHTML=t==="spawn"?card(data.spawn,"spawn"):t==="spawner"?card(data.spawner,"spawner"):data[t].map((c,i)=>card(c,`${t}:${i}`)).join("");grid.querySelectorAll("button").forEach(b=>b.onclick=()=>openCrate(b.dataset.key))}
-function openCrate(k){let c;if(k.includes(":")){const[a,b]=k.split(":");c=data[a][+b]}else c=data[k];$("#crateIcon").textContent=c.i;$("#crateTitle").textContent=c.n;$("#cratePrice").textContent=c.p;$("#crateBody").innerHTML=c.c?c.c.map(([n,p])=>`<div class="chance"><span>${n}</span><div class="bar"><i style="width:${p/18*100}%"></i></div><b>${p}%</b></div>`).join(""):c.r.map(x=>`<div class="reward">✦ ${x}</div>`).join("");modal.classList.add("open")}
-render("classic");$$(".tab").forEach(b=>b.onclick=()=>{$$(".tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");render(b.dataset.tab)});$$('[data-close="crate"]').forEach(b=>b.onclick=()=>modal.classList.remove("open"));
+const money = n => n.toLocaleString(currentLang==="en"?"en-IE":"fr-FR",{style:"currency",currency:"EUR"});
+const cartKey="eclipse_shop_cart_v1";
+const singleGrades=["vip","eclipse","nova"];
+const singlePurchase=[...singleGrades,"premium"];
+let basket={};try{let stored=JSON.parse(localStorage.getItem(cartKey)||"{}");if(stored && typeof stored==="object")for(const [id,quantity] of Object.entries(stored)){if(products[id]&&Number.isInteger(quantity)&&quantity>0)basket[id]=singlePurchase.includes(id)?1:Math.min(quantity,99)}}catch{}
+// Conserver uniquement un grade, meme si un ancien panier avait plusieurs grades.
+let chosenGrade=singleGrades.find(id=>basket[id]);if(chosenGrade)for(const id of singleGrades)if(id!==chosenGrade)delete basket[id];
+function persistCart(){try{localStorage.setItem(cartKey,JSON.stringify(basket))}catch{}}
+function addCart(id){
+ if(!products[id])return;
+ if(singleGrades.includes(id)){
+  for(const grade of singleGrades)delete basket[grade];
+  basket[id]=1;
+ }else if(id==="premium"){
+  if(basket.premium){toast(currentLang==="en"?"Premium already in cart":"Premium déjà dans le panier");return}
+  basket.premium=1;
+ }else basket[id]=Math.min(99,(basket[id]||0)+1);
+ persistCart();refreshCart();toast(currentLang==="en"?"Added to cart":"Ajouté au panier");
+}
+// Le choix achat/cadeau reste local tant que le backend /link n'est pas connecté.
+let orderPurpose="self";
+let giftRecipient="";
+function refreshPurpose(){
+ const gift=orderPurpose==="gift";
+ $("#cartBuySelf").classList.toggle("active",!gift);
+ $("#cartGift").classList.toggle("active",gift);
+ $("#cartBuySelf").setAttribute("aria-pressed",String(!gift));
+ $("#cartGift").setAttribute("aria-pressed",String(gift));
+ $("#cartGiftFields").hidden=!gift;
+ $("#cartPurposeLabel").textContent=currentLang==="en"?"Who is this order for?":"À qui est destiné le panier ?";
+ $("#cartBuySelf").textContent=currentLang==="en"?"🛍 Buy for myself":"🛍 Acheter pour moi";
+ $("#cartGift").textContent=currentLang==="en"?"🎁 Send as gift":"🎁 Offrir";
+ $("#cartGiftFields").querySelector("label").textContent=currentLang==="en"?"Recipient Minecraft username":"Pseudo Minecraft du destinataire";
+ $("#cartGiftHelp").textContent=currentLang==="en"?"The recipient must be verified on the server before payment.":"Le compte du destinataire devra être vérifié sur le serveur avant tout paiement.";
+ $("#cartPurposeNotice").textContent=gift?(currentLang==="en"?"Gift recipient is not verified yet — payment disabled.":"Destinataire non vérifié — paiement désactivé."):(currentLang==="en"?"Purchases will go to your verified Minecraft account after linking.":"Tes achats seront associés à ton compte Minecraft vérifié après connexion.");
+}
+$("#cartBuySelf").addEventListener("click",()=>{orderPurpose="self";refreshPurpose()});
+$("#cartGift").addEventListener("click",()=>{orderPurpose="gift";refreshPurpose()});
+$("#cartRecipient").addEventListener("input",e=>{giftRecipient=e.target.value.trim()});
+const grid=$("#crateGrid"),modal=$("#crateModal"),cartModal=$("#cartModal");
+function renderCrates(){grid.innerHTML=["spawner","keyEclipse","keyNova"].map(id=>{const p=products[id];return `<article class="crate-card"><div class="ci">${p.icon}</div><h4>${p.name}</h4><div class="price">${p.price===null?(currentLang==="en"?"Price TBD":"Prix à confirmer"):money(p.price)}</div><p>${p.desc}</p><button type="button" data-product="${id}" ${p.price===null?'disabled title="Prix en attente de validation"':""}>${p.price===null?(currentLang==="en"?"Coming soon":"À confirmer"):(currentLang==="en"?"Add to cart":"Ajouter au panier")}</button></article>`}).join("");grid.querySelectorAll("button[data-product]").forEach(b=>b.addEventListener("click",()=>addCart(b.dataset.product)))}
+function refreshCart(){
+ const entries=Object.entries(basket).filter(([id,q])=>products[id]&&q>0);
+ const count=entries.reduce((n,[,q])=>n+q,0);const badge=$("#cartBadge");badge.textContent=count;badge.hidden=count===0;
+ $("#cartLines").innerHTML=entries.length?entries.map(([id,q])=>{const p=products[id];return `<div class="cart-line"><div class="cart-line-icon">${p.icon}</div><div class="cart-line-main"><strong>${p.name}</strong><small>${p.price===null?"Prix à confirmer":money(p.price)+" / unité"}</small><div class="cart-quantity"><button type="button" data-cart-action="minus" data-id="${id}" aria-label="Retirer une unité">−</button><span>${q}</span>${singlePurchase.includes(id)?"":`<button type="button" data-cart-action="plus" data-id="${id}" aria-label="Ajouter une unité">+</button>`}</div></div><div class="cart-line-right"><strong>${p.price===null?"—":money(p.price*q)}</strong><button type="button" class="cart-delete" data-cart-action="delete" data-id="${id}" aria-label="Supprimer cet article">×</button></div></div>`}).join(""):`<div class="cart-empty"><span>✧</span><strong>${currentLang==="en"?"Your cart is empty":"Ton panier est vide"}</strong><p>${currentLang==="en"?"Add products from the shop":"Ajoute des produits depuis la boutique"}</p></div>`;
+ $("#cartTotal").textContent=money(entries.reduce((t,[id,q])=>t+(products[id].price||0)*q,0));
+ $("#cartUnpriced").textContent=entries.some(([id])=>products[id].price===null)?(currentLang==="en"?"Some prices need confirmation.":"Certains prix restent à confirmer."):"";
+ $("#cartLines").querySelectorAll("[data-cart-action]").forEach(el=>el.addEventListener("click",()=>{const {id,cartAction}=el.dataset;if(cartAction==="plus")basket[id]=singlePurchase.includes(id)?1:Math.min(99,(basket[id]||0)+1);if(cartAction==="minus")basket[id]=(basket[id]||0)-1;if(cartAction==="delete"||basket[id]<=0)delete basket[id];persistCart();refreshCart()}));
+}
+function toggleCart(force){const next=typeof force==="boolean"?force:!cartModal.classList.contains("open");cartModal.classList.toggle("open",next);cartModal.setAttribute("aria-hidden",String(!next));$("#openCart").setAttribute("aria-expanded",String(next));if(next){refreshCart();refreshPurpose()}}
+$("#openCart").onclick=()=>toggleCart();$("#closeCart").onclick=()=>toggleCart(false);
+document.addEventListener("pointerdown",e=>{if(cartModal.classList.contains("open")&&!cartModal.contains(e.target)&&!$("#openCart").contains(e.target))toggleCart(false)});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleCart(false)});
+$$(".rank .add-cart").forEach(b=>b.onclick=()=>addCart(b.dataset.product));
+$("#cartCheckout").onclick=()=>toast(currentLang==="en"?"Payments not configured yet":"Paiements non configurés pour le moment");
+$("#passInfo").onclick=()=>addCart("premium");
+$$ ("[data-extra-product]").forEach(b=>b.onclick=()=>addCart(b.dataset.extraProduct));
+window.eclipseCartReady=true;renderCrates();refreshCart();
 
 // settings conserved
 const settings=$("#settings"),shade=$("#settingsShade");
@@ -177,7 +229,7 @@ $("#registerForm").onsubmit=async e=>{
  try{
   const r=await fetch(`${API_BASE}/auth/register`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("#registerEmail").value.trim(),minecraftUsername:$("#registerMinecraft").value.trim(),password:p})});
   const d=await r.json();if(!r.ok)throw new Error(d.error||"Erreur");
-  s.textContent="Compte créé. Tu peux te connecter.";
+  s.textContent="Compte créé. Vérifie ton e-mail avant de te connecter.";
  }catch(err){s.textContent=err.message==="Failed to fetch"?"Le backend Render n'est pas encore connecté.":err.message}
 };
 
@@ -186,7 +238,7 @@ $("#loginForm").onsubmit=async e=>{
  try{
   const r=await fetch(`${API_BASE}/auth/login`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("#loginEmail").value.trim(),password:$("#loginPassword").value})});
   const d=await r.json();if(!r.ok)throw new Error(d.error||"Erreur");
-  localStorage.setItem(TOKEN_KEY,d.token);s.textContent="Connexion réussie.";await refreshAccount();
+  localStorage.setItem(TOKEN_KEY,d.token);if(d.refresh_token)localStorage.setItem("eclipse_refresh_token",d.refresh_token);s.textContent="Connexion réussie.";await refreshAccount();
  }catch(err){s.textContent=err.message==="Failed to fetch"?"Le backend Render n'est pas encore connecté.":err.message}
 };
 
@@ -204,26 +256,38 @@ async function refreshAccount(){
   $("#profilePlaytime").textContent=d.playtime||"0h";
  }catch{localStorage.removeItem(TOKEN_KEY);auth.classList.remove("hidden");profile.classList.add("hidden")}
 }
-$("#logoutBtn").onclick=()=>{localStorage.removeItem(TOKEN_KEY);refreshAccount()};
+$("#logoutBtn").onclick=()=>{localStorage.removeItem(TOKEN_KEY);localStorage.removeItem("eclipse_refresh_token");refreshAccount()};
 
 // SCORE TABLE
 let currentScore="money";
-const scoreDemo={
- money:[["ShadowEclipse","Nova","824.3M $"],["Solaris","Eclipse","391.8M $"],["VoidKing","VIP","202.4M $"]],
- shards:[["Solaris","Eclipse","18 420"],["ShadowEclipse","Nova","12 604"],["Nyx","default","8 210"]],
- kills:[["VoidKing","VIP","1 482"],["ShadowEclipse","Nova","1 116"],["Solaris","Eclipse","987"]],
- deaths:[["Astra","default","188"],["Nyx","default","161"],["VoidKing","VIP","143"]],
- playtime:[["ShadowEclipse","Nova","242h"],["Solaris","Eclipse","198h"],["VoidKing","VIP","176h"]]
-};
-function renderScore(rows,demo=false){
- $("#scoreRows").innerHTML=rows.map((x,i)=>`<div class="score-row"><span>${i+1}</span><span class="score-player">${x.minecraft_username||x[0]}</span><span><b class="score-grade">${x.rank_name||x[1]||"default"}</b></span><span class="score-value">${x.value??x[2]}</span></div>`).join("");
- $("#scoreStatus").textContent=demo?"Mode aperçu — branche Render pour afficher les vraies stats Minecraft.":"Données live EclipseSMP.";
+const safeText=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+function renderScore(rows){
+ const filtered=rows.filter(x=>!['rip282528','david7277219'].includes(String(x.minecraft_username||x.username||'').toLowerCase())).slice(0,10);
+ $("#scoreRows").innerHTML=filtered.length?filtered.map((x,i)=>`<div class="score-row"><span class="place">${String(i+1).padStart(2,'0')}</span><span class="score-player">${safeText(x.minecraft_username||x.username||'Joueur')}</span><span><b class="score-grade">${safeText(x.rank_name||'—')}</b></span><span class="score-value">${safeText(x.value??'—')}</span></div>`).join(''):'<div class="score-unavailable">Aucun classement disponible pour le moment.</div>';
+ $("#scoreStatus").textContent=filtered.length?"Classement synchronisé avec le serveur.":"Aucune statistique synchronisée pour le moment.";
 }
 async function loadScore(){
- try{
-  const r=await fetch(`${API_BASE}/leaderboard?type=${currentScore}`,{signal:AbortSignal.timeout(2500)});
-  if(!r.ok)throw new Error();const d=await r.json();if(!Array.isArray(d)||!d.length)throw new Error();renderScore(d,false);
- }catch{renderScore(scoreDemo[currentScore],true)}
+ $("#scoreRows").innerHTML='<div class="score-unavailable">Chargement des statistiques…</div>';
+ if(API_BASE.includes('TON-API')){$("#scoreRows").innerHTML='<div class="score-unavailable">🌌 Connexion au serveur indisponible</div>';$("#scoreStatus").textContent='L’API de statistiques doit encore être connectée.';return}
+ try{const r=await fetch(`${API_BASE}/leaderboard?type=${encodeURIComponent(currentScore)}`,{signal:AbortSignal.timeout(4500)});if(!r.ok)throw new Error();const data=await r.json();if(!Array.isArray(data))throw new Error();renderScore(data)}catch{$("#scoreRows").innerHTML='<div class="score-unavailable">🌌 Connexion au serveur indisponible</div>';$("#scoreStatus").textContent='Impossible de récupérer des données réelles.'}
 }
 $$(".score-tab").forEach(b=>b.onclick=()=>{$$(".score-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");currentScore=b.dataset.score;loadScore()});
 loadScore();
+const reduced=$("#reduceMotion");
+reduced.checked=localStorage.getItem('eclipse_reduced_motion')==='1';
+function setReducedMotion(on){document.documentElement.classList.toggle('reduced-motion',on);localStorage.setItem('eclipse_reduced_motion',on?'1':'0')}
+setReducedMotion(reduced.checked);reduced.addEventListener('change',()=>setReducedMotion(reduced.checked));
+$("#forgotPassword").onclick=()=>{$("#loginForm").classList.add('hidden');$("#registerForm").classList.add('hidden');$("#resetHelp").classList.remove('hidden');};
+$("#resetBack").onclick=()=>{$("#resetHelp").classList.add('hidden');$("#loginForm").classList.remove('hidden')};
+
+// New account linking and recovery UI. Supabase confirmation links use the configured Site URL.
+async function eclipseRequest(path,token,body){const r=await fetch(`${API_BASE}${path}`,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify(body||{})});const d=await r.json();if(!r.ok)throw Error(d.error||'Requête impossible');return d}
+const requestCode=document.getElementById('requestLinkCode');
+if(requestCode)requestCode.onclick=async()=>{const status=document.getElementById('linkStatus');try{const d=await eclipseRequest('/link/request',localStorage.getItem(TOKEN_KEY));status.textContent=`Dans Minecraft, tape : ${d.command} (valable 10 minutes)`}catch(e){status.textContent=e.message}};
+const forgotSend=document.getElementById('sendRecovery');
+if(forgotSend)forgotSend.onclick=async()=>{const status=document.getElementById('resetStatus');try{const d=await eclipseRequest('/auth/forgot',null,{email:document.getElementById('recoveryEmail').value.trim()});status.textContent=d.message}catch(e){status.textContent=e.message}};
+const hashParams=new URLSearchParams(location.hash.replace(/^#/,''));
+if(hashParams.get('access_token')&&hashParams.get('type')==='recovery'){
+ localStorage.setItem(TOKEN_KEY,hashParams.get('access_token'));history.replaceState({},'',location.pathname+location.search);document.getElementById('accountModal')?.classList.add('open');document.getElementById('resetHelp')?.classList.remove('hidden');document.getElementById('authArea')?.classList.remove('hidden');document.getElementById('profileArea')?.classList.add('hidden');document.getElementById('loginForm')?.classList.add('hidden');document.getElementById('registerForm')?.classList.add('hidden');document.getElementById('newPasswordBox')?.classList.remove('hidden');
+}
+const resetSubmit=document.getElementById('changeRecoveredPassword');if(resetSubmit)resetSubmit.onclick=async()=>{const status=document.getElementById('resetStatus');try{await eclipseRequest('/auth/update-password',localStorage.getItem(TOKEN_KEY),{password:document.getElementById('recoveredPassword').value});status.textContent='Mot de passe modifié.'}catch(e){status.textContent=e.message}};

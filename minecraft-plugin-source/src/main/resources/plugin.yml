@@ -1,0 +1,16 @@
+name: EclipseLink
+version: 1.0.0
+main: eclipsesmp.EclipseLink
+api-version: '1.21'
+author: EclipseSMP
+softdepend: [PlaceholderAPI]
+commands:
+  link:
+    description: Lier son compte Minecraft au site EclipseSMP
+    usage: /link <code>
+  eclipsesync:
+    description: Etat de la connexion EclipseSMP
+    permission: eclipselink.admin
+permissions:
+  eclipselink.admin:
+    default: op

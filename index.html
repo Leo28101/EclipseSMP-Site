@@ -25,17 +25,18 @@
   <canvas id="space"></canvas>
   <div class="nebula n1"></div><div class="nebula n2"></div>
   <header class="nav">
-    <a class="logo" href="#home"><span class="logo-orb"></span><strong>ECLIPSE</strong><em>SMP</em><b>V2</b></a>
+    <a class="logo" href="#home"><span class="logo-orb"></span><strong>ECLIPSE</strong><em>SMP</em><b>2026</b></a>
     <nav class="navlinks">
       <a href="#home" data-i18n="nav_home">Accueil</a>
       <a href="#features" data-i18n="nav_server">Serveur</a>
       <a href="#leaderboard" data-i18n="nav_leaderboard">Classement</a>
       <a href="#shop" data-i18n="nav_shop">Boutique</a>
-      <a href="#crates" data-i18n="nav_keys">Clés</a>
+      <a href="#crates" data-i18n="nav_keys">Clés</a><a href="#battlepass">Battle Pass</a>
       <a href="#rules" data-i18n="nav_rules">Règles</a>
     </nav>
     <div class="actions">
       <button id="langBtn" class="langbtn" title="Langue / Language">FR</button>
+      <button id="openCart" class="iconbtn nav-cart" type="button" aria-label="Ouvrir le panier" aria-expanded="false" title="Panier"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.5 13h12l2.5-9H6"/></svg><span id="cartBadge" class="cart-badge" hidden>0</span></button>
       <button id="accountBtn" class="iconbtn" title="Compte">👤</button>
       <button id="soundBtn" class="iconbtn" title="Musique">🔇</button>
       <button id="settingsBtn" class="iconbtn" title="Paramètres">⚙</button>
@@ -53,7 +54,7 @@
         </div>
         <div class="serverline">
           <span><i></i> EN DÉVELOPPEMENT</span>
-          <b>play.eclipsesmp.fr</b>
+          <b>eclipsesmp.eu</b>
           <span>V2</span>
         </div>
       </div>
@@ -73,7 +74,7 @@
         <article class="card reveal"><span>💰</span><h4>Économie</h4><p>/shop, /sell, /ah, échanges, gemmes et économie pensée pour durer.</p></article>
         <article class="card reveal"><span>🌍</span><h4>Exploration</h4><p>RTP, bases secrètes, mondes à explorer et progression constante.</p></article>
         <article class="card reveal"><span>🧰</span><h4>Outils Custom</h4><p>Améthyste, Eclipse et Nova avec outils spéciaux et progression premium.</p></article>
-        <article class="card reveal"><span>🎁</span><h4>Clés & Récompenses</h4><p>Rare, Épique, Légendaire, Spawn, Spawner et clés Premium.</p></article>
+        <article class="card reveal"><span>🎁</span><h4>Clés & Récompenses</h4><p>Clés Spawner, Eclipse et Nova, ainsi que les récompenses quotidiennes.</p></article>
         <article class="card reveal"><span>🎉</span><h4>Events</h4><p>Événements, récompenses et nouveautés régulières pour garder le serveur vivant.</p></article>
       </div>
     </section>
@@ -82,46 +83,58 @@
     <section id="leaderboard" class="section">
       <div class="section-head reveal"><small data-i18n="section_live">CLASSEMENT LIVE</small><h3 data-i18n-html="leader_title">Les meilleurs <span>joueurs.</span></h3></div>
       <div class="score-tabs reveal">
-        <button class="score-tab active" data-score="money" data-i18n="money">Argent</button>
-        <button class="score-tab" data-score="shards" data-i18n="gems">Gemmes</button>
+        <button class="score-tab active" data-score="money">Argent</button>
+        <button class="score-tab" data-score="playtime" data-i18n="time">Temps de jeu</button>
+        <button class="score-tab" data-score="shards" data-i18n="gems">Shards</button>
         <button class="score-tab" data-score="kills">Kills</button>
-        <button class="score-tab" data-score="deaths" data-i18n="deaths">Morts</button>
-        <button class="score-tab" data-score="playtime" data-i18n="time">Temps</button>
       </div>
       <div class="scoreboard reveal">
         <div class="score-head"><span>#</span><span data-i18n="player">Joueur</span><span data-i18n="rank">Grade</span><span data-i18n="value">Valeur</span></div>
-        <div id="scoreRows"><div class="score-row"><span>—</span><span>Connexion à l'API...</span><span>—</span><span>—</span></div></div>
+        <div id="scoreRows"><div class="score-row"><span>—</span><span>Connexion au serveur indisponible</span><span>—</span><span>—</span></div></div>
       </div>
-      <p id="scoreStatus" class="score-status" data-i18n="backend_wait">En attente du backend Render.</p>
+      <p id="scoreStatus" class="score-status" data-i18n="backend_wait">Les données apparaîtront après connexion du serveur.</p>
     </section>
 
     <section id="shop" class="section">
       <div class="section-head reveal"><small data-i18n="section_shop">BOUTIQUE</small><h3 data-i18n-html="shop_title">Choisis ton <span>rang.</span></h3></div>
+      <p class="shop-subtitle" data-shop-fr="Les grades durent 30 jours, sans abonnement. Les commandes seront activées après la connexion des paiements." data-shop-en="Ranks last 30 days, with no subscription. Orders will be enabled after payment setup.">Les grades durent 30 jours, sans abonnement. Les commandes seront activées après la connexion des paiements.</p>
       <div class="pricing">
-        <article class="rank reveal"><div class="rank-top"><span>VIP</span><b>3,99 €</b></div><p>Avantages essentiels et badge VIP.</p><button disabled>Bientôt</button></article>
-        <article class="rank featured reveal"><div class="popular">POPULAIRE</div><div class="rank-top"><span>ECLIPSE</span><b>7,99 €</b></div><p>Bonus améliorés et identité Eclipse.</p><button disabled>Bientôt</button></article>
-        <article class="rank reveal"><div class="rank-top"><span>NOVA</span><b>11,99 €</b></div><p>Le niveau premium le plus élevé.</p><button disabled>Bientôt</button></article>
+        <article class="rank reveal"><div class="rank-top"><span>VIP</span><b>3,99 €</b></div><p>7 homes · 500 shards/semaine · Tag VIP doré · Rôle Discord.</p><span class="product-term">30 jours · Sans renouvellement automatique</span><button class="add-cart" data-product="vip" data-shop-fr="Ajouter au panier" data-shop-en="Add to cart">Ajouter au panier</button></article>
+        <article class="rank featured reveal"><div class="popular">POPULAIRE</div><div class="rank-top"><span>ECLIPSE</span><b>7,99 €</b></div><p>17 homes · Inclut les avantages VIP · Tag Eclipse violet.</p><span class="product-term">30 jours · Sans renouvellement automatique</span><button class="add-cart" data-product="eclipse" data-shop-fr="Ajouter au panier" data-shop-en="Add to cart">Ajouter au panier</button></article>
+        <article class="rank reveal"><div class="rank-top"><span>NOVA</span><b>11,99 €</b></div><p>Homes illimités · Inclut Eclipse · Tag Nova rose/violet.</p><span class="product-term">30 jours · Sans renouvellement automatique</span><button class="add-cart" data-product="nova" data-shop-fr="Ajouter au panier" data-shop-en="Add to cart">Ajouter au panier</button></article>
       </div>
     </section>
 
     <section id="crates" class="section">
       <div class="section-head reveal"><small data-i18n="section_keys">CLÉS</small><h3 data-i18n-html="keys_title">Découvre ce qu’il y a <span>à l’intérieur.</span></h3></div>
-      <div class="tabs reveal">
-        <button class="tab active" data-tab="classic">Classiques</button>
-        <button class="tab" data-tab="premium">Premium</button>
-        <button class="tab" data-tab="spawn">Spawn</button>
-        <button class="tab" data-tab="spawner">Spawner</button>
-      </div>
+      <p class="shop-subtitle" data-shop-fr="Trois clés exclusives. Les prix non validés restent à confirmer." data-shop-en="Three exclusive keys. Unconfirmed prices will be announced later.">Trois clés exclusives. Les prix non validés restent à confirmer.</p>
       <div id="crateGrid" class="crate-grid reveal"></div>
+    </section>
+
+    <section id="battlepass" class="section">
+      <div class="section-head reveal"><small>BATTLE PASS</small><h3>Une saison. <span>50 niveaux.</span></h3></div>
+      <div class="pass-offer reveal"><div><small>FREE / PREMIUM</small><h4>Le Passe EclipseSMP</h4><p>50 niveaux, deux voies de récompenses (Gratuit / Premium), missions et progression. Premium : 5 000 shards en jeu.</p><p class="shop-subtitle">Prix en euros à confirmer. Le panier n'attribue pas encore le Premium.</p></div><button class="btn ghost" type="button" id="passInfo">Ajouter le Premium au panier</button></div>
+    </section>
+
+    <section id="services" class="section">
+      <div class="section-head reveal"><small>SERVICES</small><h3>Une seconde <span>chance.</span></h3></div>
+      <p class="shop-subtitle">Ces services nécessitent la vérification de ton compte et la validation des conditions par le staff. Aucun débanissement ou démute automatique n'est actif pour le moment.</p>
+      <div class="ranks">
+        <article class="rank reveal"><div class="rank-top"><span>UNBAN</span><b>7,00 €</b></div><p>Demande de débanissement, selon les conditions du serveur.</p><button type="button" class="add-cart" data-extra-product="unban">Ajouter au panier</button></article>
+        <article class="rank reveal"><div class="rank-top"><span>UNMUTE</span><b>2,00 €</b></div><p>Demande de retrait de mute, selon les conditions du serveur.</p><button type="button" class="add-cart" data-extra-product="unmute">Ajouter au panier</button></article>
+      </div>
     </section>
 
     <section id="rules" class="section">
       <div class="section-head reveal"><small data-i18n="section_rules">RÈGLES / RULES</small><h3 data-i18n-html="rules_title">Simple, clair, <span>équitable.</span></h3></div>
-      <div class="rules">
+      <p class="rules-notice">Projet de règlement : les sanctions et conditions doivent être validées par le staff avant publication officielle.</p><p class="rules-notice">Règlement proposé, à valider par le staff avant publication officielle.</p><div class="rules">
         <details class="rule reveal"><summary>⚔️ PvP</summary><p>🇫🇷 PvP autorisé, spawn-kill abusif interdit.<br>🇬🇧 PvP allowed, excessive spawn-killing forbidden.</p></details>
         <details class="rule reveal"><summary>🏰 Bases & Raiding</summary><p>🇫🇷 Pillage autorisé, destruction gratuite interdite.<br>🇬🇧 Raiding allowed, pointless destruction forbidden.</p></details>
         <details class="rule reveal"><summary>🚫 Cheats</summary><p>🇫🇷 X-Ray, KillAura, Reach, Fly, Speed et exploits interdits.<br>🇬🇧 X-Ray, KillAura, Reach, Fly, Speed and exploits are forbidden.</p></details>
         <details class="rule reveal"><summary>💬 Discord</summary><p>🇫🇷 Pas de spam, harcèlement ou publicité non autorisée.<br>🇬🇧 No spam, harassment or unauthorized advertising.</p></details>
+        <details class="rule reveal"><summary>🤝 Respect</summary><p>🇫🇷 Menaces, discrimination et usurpation interdites.<br>🇬🇧 Threats, discrimination and impersonation are prohibited.</p></details>
+        <details class="rule reveal"><summary>🐛 Exploitation de bugs</summary><p>🇫🇷 Signaler les failles et ne pas en abuser.<br>🇬🇧 Report vulnerabilities; do not abuse them.</p></details>
+        <details class="rule reveal"><summary>🔐 Comptes et sanctions</summary><p>🇫🇷 Protégez vos identifiants. Les contestations se font via le support Discord.<br>🇬🇧 Protect your credentials. Appeal sanctions through Discord support.</p></details>
       </div>
     </section>
   </main>
@@ -144,6 +157,18 @@
     </div>
   </div>
 
+  <div id="cartModal" class="cart-popover" role="dialog" aria-modal="false" aria-label="Panier EclipseSMP" aria-hidden="true">
+    <div class="cart-popover-head"><div><small>ECLIPSESMP STORE</small><h3 data-shop-fr="Mon panier" data-shop-en="My cart">Mon panier</h3></div><button id="closeCart" class="cart-popover-close" type="button" aria-label="Fermer le panier">×</button></div>
+    <div class="cart-scroll"><div id="cartLines" class="cart-lines"></div></div>
+    <div class="cart-popover-bottom">
+      <div class="cart-purpose" role="group" aria-label="Destination de la commande">
+        <span class="cart-purpose-label" id="cartPurposeLabel">À qui est destiné le panier ?</span>
+        <div class="cart-purpose-buttons"><button type="button" id="cartBuySelf" class="active" aria-pressed="true">🛍 Acheter pour moi</button><button type="button" id="cartGift" aria-pressed="false">🎁 Offrir</button></div>
+        <div id="cartGiftFields" class="cart-gift-fields" hidden><label for="cartRecipient">Pseudo Minecraft du destinataire</label><input id="cartRecipient" maxlength="16" spellcheck="false" autocomplete="off" placeholder="Pseudo Minecraft"/><p id="cartGiftHelp">Le compte du destinataire devra être vérifié sur le serveur avant tout paiement.</p></div>
+        <p id="cartPurposeNotice" class="cart-purpose-notice">Tes achats seront associés à ton compte Minecraft vérifié après connexion.</p>
+      </div><div class="cart-total"><span data-shop-fr="Total" data-shop-en="Total">Total</span><strong id="cartTotal">0,00 €</strong></div><p id="cartUnpriced" class="shop-subtitle"></p><button id="cartCheckout" type="button" class="btn primary full" disabled><span data-shop-fr="Paiements bientôt disponibles" data-shop-en="Payments coming soon">Paiements bientôt disponibles</span></button><p class="cart-hint" data-shop-fr="Aucun paiement n’est encore possible." data-shop-en="Payments are not available yet.">Aucun paiement n’est encore possible.</p></div>
+  </div>
+
   <!-- COMPTE: remplacé uniquement ici -->
   <div id="accountModal" class="modal">
     <div class="shade" data-close="account"></div>
@@ -162,7 +187,7 @@
         <form id="loginForm" class="auth-form">
           <label>Email<input id="loginEmail" type="email" required></label>
           <label>Mot de passe<input id="loginPassword" type="password" required></label>
-          <button class="btn primary full" type="submit" data-i18n="login_btn">SE CONNECTER</button>
+          <button class="btn primary full" type="submit" data-i18n="login_btn">SE CONNECTER</button><button type="button" id="forgotPassword" class="text-action">Mot de passe oublié ?</button>
           <p id="loginStatus" class="status"></p>
         </form>
 
@@ -174,6 +199,7 @@
           <button class="btn primary full" type="submit" data-i18n="register_btn">CRÉER MON COMPTE</button>
           <p id="registerStatus" class="status"></p>
         </form>
+        <div id="resetHelp" class="reset-help hidden"><h4>Réinitialisation du mot de passe</h4><p>Entre ton e-mail pour demander un lien de récupération sécurisé.</p><label>Adresse e-mail<input type="email" id="recoveryEmail" placeholder="ton@email.fr"></label><button type="button" class="btn primary full" id="sendRecovery">ENVOYER UN LIEN</button><p id="resetStatus" class="status"></p><div id="newPasswordBox" class="hidden"><label>Nouveau mot de passe<input type="password" id="recoveredPassword" minlength="8"></label><button type="button" class="btn primary full" id="changeRecoveredPassword">CHANGER LE MOT DE PASSE</button></div><button type="button" class="btn ghost full" id="resetBack">Retour à la connexion</button></div>
       </div>
 
       <div id="profileArea" class="hidden">
@@ -188,7 +214,7 @@
           <div><span>Morts</span><b id="profileDeaths">0</b></div>
           <div><span>Temps</span><b id="profilePlaytime">0h</b></div>
         </div>
-        <button id="logoutBtn" class="btn ghost full" data-i18n="logout">SE DÉCONNECTER</button>
+        <div style="margin:18px 0;display:grid;gap:10px"><button id="requestLinkCode" class="btn primary full" type="button">LIER MON COMPTE MINECRAFT</button><p id="linkStatus" class="status" style="overflow-wrap:anywhere"></p></div><button id="logoutBtn" class="btn ghost full" data-i18n="logout">SE DÉCONNECTER</button>
       </div>
     </div>
   </div>
@@ -198,11 +224,11 @@
     <div class="settings-head"><div><small>ECLIPSESMP</small><h3>Paramètres</h3></div><button id="closeSettings" class="close static">×</button></div>
     <div class="setting"><div><b>Musique</b><span>Ambiance du site</span></div><label class="switch"><input id="musicToggle" type="checkbox"><i></i></label></div>
     <div class="setting block"><div class="range-head"><b>Volume</b><span id="volumeLabel">35%</span></div><input id="volume" type="range" min="0" max="100" value="35"></div>
-    <div class="setting block"><button id="replay" class="btn ghost full">▶ Rejouer l’intro</button></div>
+    <div class="setting"><div><b>Réduire les animations</b><span>Pour les appareils moins puissants</span></div><label class="switch"><input id="reduceMotion" type="checkbox"><i></i></label></div><div class="setting block"><button id="replay" class="btn ghost full">▶ Rejouer l’intro</button></div>
   </aside>
 
   <div id="settingsShade" class="settings-shade"></div>
   <div id="toast" class="toast"></div>
-  <script src="script.js?v=16"></script>
+  <script src="script.js?v=24"></script>
 </body>
 </html>
