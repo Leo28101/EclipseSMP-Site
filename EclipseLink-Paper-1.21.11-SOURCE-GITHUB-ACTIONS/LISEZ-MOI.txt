@@ -1,0 +1,18 @@
+EclipseLink pour Paper 1.21.11 (Java 21)
+
+Ce ZIP contient le CODE SOURCE, pas un JAR compile.
+
+COMMENT OBTENIR LE JAR SUR GITHUB
+1. Dans le depot GitHub EclipseSMP-Site, ajoutez le dossier minecraft-plugin-source a la racine.
+2. Ajoutez aussi le fichier .github/workflows/eclipse-link.yml (respecter le chemin).
+3. Ouvrez l'onglet Actions > Compiler EclipseLink (.jar) > Run workflow.
+4. Quand la compilation reussit, cliquez sur EclipseLink-jar dans Artifacts pour telecharger le ZIP avec EclipseLink-1.0.0.jar.
+5. Placez le JAR dans plugins/ du serveur, redemarrez, puis editez plugins/EclipseLink/config.yml.
+6. backend-url = https://eclipsesmp-site.onrender.com ; secret = MEME valeur MINECRAFT_SYNC_SECRET que Render. Ne jamais publier cette valeur.
+7. Redemarrez, testez /eclipsesync puis /link <code> depuis le site.
+
+LIMITES ACTUELLES
+* Les routes backend /api/minecraft/link/claim et /api/minecraft/stats doivent etre deployees sur Render.
+* Les classements Money et Shards requierent PlaceholderAPI et les vrais placeholders EconomyModern.
+* Le plugin ne gere ni /vote, ni TOP votes, et ne synchronise que les joueurs actuellement en ligne.
+* Compatibilite Bedrock et Java non-premium a tester sur le serveur avec Geyser/Floodgate et authentification appropriee.
