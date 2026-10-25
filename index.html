@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#05030c">
   <title>EclipseSMP — V2</title>
-  <link rel="stylesheet" href="style.css?v=16">
+  <link rel="stylesheet" href="style.css?v=32">
 </head>
 <body>
   <audio id="ambient" src="ambient.mp3" loop preload="auto"></audio>
@@ -13,14 +13,14 @@
   <section id="intro" class="intro">
     <canvas id="introCanvas"></canvas>
     <div class="intro-copy" id="introCopy">
-      <div class="intro-badge">ECLIPSESMP • V2</div>
-      <h1>UNE NOUVELLE<br><span>ÈRE COMMENCE.</span></h1>
-      <p>Une expérience Minecraft repensée de zéro.</p>
+      <div class="intro-badge">ECLIPSESMP • NOUVELLE ÈRE</div>
+      <div class="intro-mark" aria-hidden="true"><span class="intro-mark-inner"></span></div><h1>ENTRE DANS<br><span>L’ÉCLIPSE.</span></h1>
+      <p>Un monde. Trois plateformes. Une seule légende.<br><strong>JAVA PREMIUM · JAVA CRACK · BEDROCK</strong></p>
       <button id="startIntro" class="btn primary large">DÉMARRER L’EXPÉRIENCE</button>
-      <small>Son recommandé 🎧</small>
+      <small>Expérience cinématique · Son optionnel 🎧</small><div class="intro-features"><span>✦ SURVIE</span><span>✦ PVP</span><span>✦ ÉCONOMIE</span></div>
     </div>
     <button id="skipIntro" class="skip">Passer</button>
-    <div class="intro-progress"><i id="introProgress"></i></div>
+    <div id="introStage" class="intro-stage" aria-live="off">PRÊT À DÉCOLLER</div><div class="intro-progress"><i id="introProgress"></i></div>
   </section>
   <canvas id="space"></canvas>
   <div class="nebula n1"></div><div class="nebula n2"></div>
@@ -107,7 +107,7 @@
 
     <section id="crates" class="section">
       <div class="section-head reveal"><small data-i18n="section_keys">CLÉS</small><h3 data-i18n-html="keys_title">Découvre ce qu’il y a <span>à l’intérieur.</span></h3></div>
-      <p class="shop-subtitle" data-shop-fr="Trois clés exclusives. Les prix non validés restent à confirmer." data-shop-en="Three exclusive keys. Unconfirmed prices will be announced later.">Trois clés exclusives. Les prix non validés restent à confirmer.</p>
+      <p class="shop-subtitle" data-shop-fr="Trois clés exclusives : Spawner 1,99 €, Eclipse 2,25 € et Nova 2,99 €." data-shop-en="Three exclusive keys: Spawner €1.99, Eclipse €2.25 and Nova €2.99.">Trois clés exclusives : Spawner 1,99 €, Eclipse 2,25 € et Nova 2,99 €.</p>
       <div id="crateGrid" class="crate-grid reveal"></div>
     </section>
 
@@ -166,7 +166,22 @@
         <div class="cart-purpose-buttons"><button type="button" id="cartBuySelf" class="active" aria-pressed="true">🛍 Acheter pour moi</button><button type="button" id="cartGift" aria-pressed="false">🎁 Offrir</button></div>
         <div id="cartGiftFields" class="cart-gift-fields" hidden><label for="cartRecipient">Pseudo Minecraft du destinataire</label><input id="cartRecipient" maxlength="16" spellcheck="false" autocomplete="off" placeholder="Pseudo Minecraft"/><p id="cartGiftHelp">Le compte du destinataire devra être vérifié sur le serveur avant tout paiement.</p></div>
         <p id="cartPurposeNotice" class="cart-purpose-notice">Tes achats seront associés à ton compte Minecraft vérifié après connexion.</p>
-      </div><div class="cart-total"><span data-shop-fr="Total" data-shop-en="Total">Total</span><strong id="cartTotal">0,00 €</strong></div><p id="cartUnpriced" class="shop-subtitle"></p><button id="cartCheckout" type="button" class="btn primary full" disabled><span data-shop-fr="Paiements bientôt disponibles" data-shop-en="Payments coming soon">Paiements bientôt disponibles</span></button><p class="cart-hint" data-shop-fr="Aucun paiement n’est encore possible." data-shop-en="Payments are not available yet.">Aucun paiement n’est encore possible.</p></div>
+      </div><div class="cart-total"><span data-shop-fr="Total" data-shop-en="Total">Total</span><strong id="cartTotal">0,00 €</strong></div><p id="cartUnpriced" class="shop-subtitle"></p><button id="cartCheckout" type="button" class="btn primary full" disabled>CONNEXION REQUISE</button><p class="cart-hint" data-shop-fr="Aucun paiement n’est encore possible." data-shop-en="Payments are not available yet.">Aucun paiement n’est encore possible.</p></div>
+  </div>
+
+  <!-- Vérification explicite avant toute tentative de commande. Aucun débit possible. -->
+  <div id="orderReviewModal" class="modal" role="dialog" aria-modal="true" aria-label="Confirmation de commande">
+    <div class="shade" id="orderReviewClose"></div>
+    <div class="modal-card order-review-card">
+      <small>ECLIPSESMP • BOUTIQUE</small>
+      <h3>Confirmer ma commande</h3>
+      <p>Vérifie tes articles et ton destinataire avant de continuer.</p>
+      <div class="review-content"><div id="orderReviewItems"></div><div id="orderReviewRecipient"></div><strong id="orderReviewTotal"></strong></div>
+      <label class="review-accept"><input id="orderReviewAccept" type="checkbox"> Je confirme avoir vérifié ma commande et son destinataire.</label>
+      <button id="orderReviewContinue" class="btn primary full" disabled>CONTINUER VERS LE PAIEMENT</button>
+      <p class="status">Les paiements ne sont pas encore activés : aucun débit ni achat réel.</p>
+      <button type="button" class="btn ghost full" id="orderReviewBack">Retour au panier</button>
+    </div>
   </div>
 
   <!-- COMPTE: remplacé uniquement ici -->
@@ -191,14 +206,29 @@
           <p id="loginStatus" class="status"></p>
         </form>
 
-        <form id="registerForm" class="auth-form hidden">
-          <label>Email<input id="registerEmail" type="email" required></label>
-          <label>Pseudo Minecraft<input id="registerMinecraft" type="text" required></label>
-          <label>Mot de passe<input id="registerPassword" type="password" minlength="8" required></label>
-          <label>Confirmer<input id="registerPassword2" type="password" minlength="8" required></label>
-          <button class="btn primary full" type="submit" data-i18n="register_btn">CRÉER MON COMPTE</button>
-          <p id="registerStatus" class="status"></p>
-        </form>
+        <div id="registerForm" class="auth-form hidden">
+          <div class="eclipse-steps"><span class="step-current" id="regStepOne">1 · Pseudo</span><span id="regStepTwo">2 · /link</span><span id="regStepThree">3 · Compte</span></div>
+          <section id="registrationStart">
+            <p class="register-hint">Pour créer ton compte, vérifie d’abord ton identité sur notre serveur Minecraft (Java Premium, Java non-premium ou Bedrock).</p>
+            <label>Pseudo Minecraft<input id="registerMinecraft" type="text" minlength="3" maxlength="32" autocomplete="off" placeholder="Ton pseudo exact" required></label>
+            <button type="button" class="btn primary full" id="registrationGenerate">GÉNÉRER MON CODE</button>
+          </section>
+          <section id="registrationVerify" class="hidden">
+            <p class="register-hint">Connecte-toi sur EclipseSMP et exécute cette commande dans le chat :</p>
+            <div class="reg-command"><code id="registrationCommand">/link 000000</code><button type="button" id="registrationCopy">Copier</button></div>
+            <p class="register-hint">Code valable 10 minutes et utilisable une seule fois. <strong>Attente de confirmation depuis Minecraft…</strong></p>
+            <button type="button" class="btn primary full" id="registrationCheck">J'AI TAPÉ /LINK — VÉRIFIER</button>
+            <button type="button" class="text-action" id="registrationRestart">Changer de pseudo</button>
+          </section>
+          <form id="registrationFinish" class="hidden">
+            <p class="register-verified" id="registrationVerifiedName">✓ Minecraft vérifié</p>
+            <label>E-mail<input id="registerEmail" type="email" autocomplete="email" required></label>
+            <label>Mot de passe<input id="registerPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
+            <label>Confirmer le mot de passe<input id="registerPassword2" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
+            <button class="btn primary full" type="submit">CRÉER MON COMPTE</button>
+          </form>
+          <p id="registerStatus" class="status" role="status" aria-live="polite"></p>
+        </div>
         <div id="resetHelp" class="reset-help hidden"><h4>Réinitialisation du mot de passe</h4><p>Entre ton e-mail pour demander un lien de récupération sécurisé.</p><label>Adresse e-mail<input type="email" id="recoveryEmail" placeholder="ton@email.fr"></label><button type="button" class="btn primary full" id="sendRecovery">ENVOYER UN LIEN</button><p id="resetStatus" class="status"></p><div id="newPasswordBox" class="hidden"><label>Nouveau mot de passe<input type="password" id="recoveredPassword" minlength="8"></label><button type="button" class="btn primary full" id="changeRecoveredPassword">CHANGER LE MOT DE PASSE</button></div><button type="button" class="btn ghost full" id="resetBack">Retour à la connexion</button></div>
       </div>
 
@@ -229,6 +259,6 @@
 
   <div id="settingsShade" class="settings-shade"></div>
   <div id="toast" class="toast"></div>
-  <script src="script.js?v=24"></script>
+  <script src="script.js?v=32"></script>
 </body>
 </html>

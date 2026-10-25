@@ -104,3 +104,52 @@ footer{width:min(1180px,calc(100% - 38px));margin:30px auto 0;padding:35px 0 55p
 .cart-gift-fields{margin:13px 0 0}.cart-gift-fields[hidden]{display:none}.cart-gift-fields label{display:block;font-size:11px;margin-bottom:7px;color:#c8bce1}
 .cart-gift-fields input{width:100%;background:#0d0a1b;color:white;padding:12px;border:1px solid #594577;border-radius:10px;outline:0}
 .cart-gift-fields input:focus{border-color:#ae87fb}.cart-gift-fields p,.cart-purpose-notice{font-size:11px;line-height:1.5;color:#9389a8;margin:9px 0 0}
+
+/* Inscription en trois étapes Minecraft → /link → e-mail */
+.eclipse-steps{display:flex;gap:7px;justify-content:space-between;margin:12px 0 22px;font-size:11px;font-weight:750;color:#9587b4}
+.eclipse-steps span{border:1px solid #49385f;border-radius:30px;padding:8px 10px;flex:1;text-align:center}
+.eclipse-steps .step-current{color:#fff;background:#55368f;border-color:#ab80ff}
+.register-hint{color:#beb3d3;line-height:1.6;font-size:13px;margin:10px 0 16px}
+.reg-command{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#0d0a19;border:1px solid #7850be;border-radius:13px;padding:13px 14px;margin:14px 0;overflow:auto}
+.reg-command code{color:#f0e5ff;font-size:17px;font-weight:750;white-space:nowrap}
+.reg-command button{border-radius:8px;background:#7046c3;color:white;padding:8px 12px;border:0;cursor:pointer}
+.register-verified{color:#8bf3be;background:#153c2a;border-radius:10px;padding:12px;margin:8px 0 17px;font-weight:750}
+
+/* ECLIPSE CINEMATIC V3 */
+.intro{background:radial-gradient(circle at 50% 41%,#190936 0,#080513 43%,#010107 100%)}
+.intro-copy{isolation:isolate;filter:drop-shadow(0 15px 80px #070214);animation:introAppear 1.3s ease both}
+@keyframes introAppear{from{opacity:0;transform:translateY(28px) scale(.96)}to{opacity:1;transform:none}}
+.intro-copy:before{content:"";position:absolute;z-index:-1;inset:8% -5%;border:1px solid rgba(156,104,255,.12);border-radius:42px;background:linear-gradient(125deg,rgba(49,19,94,.16),rgba(2,8,30,.18));box-shadow:0 0 120px rgba(129,55,255,.08);backdrop-filter:blur(2px)}
+.intro-mark{margin:0 auto 14px;width:104px;height:104px;border-radius:50%;position:relative;display:grid;place-items:center;filter:drop-shadow(0 0 23px #863aff);animation:orbitFloat 5s ease-in-out infinite}
+.intro-mark:before{content:"";position:absolute;inset:5px;border-radius:50%;background:conic-gradient(from 190deg,#3c238f,#a66dff,#c4efff,#7955ed,#3c238f);box-shadow:0 0 30px #a264ff8a}
+.intro-mark-inner{width:75px;height:75px;border-radius:50%;background:radial-gradient(circle at 35% 28%,#0f0a25,#020209 66%);z-index:1;box-shadow:inset 6px -6px 16px #6b37ae69}
+@keyframes orbitFloat{50%{transform:translateY(-11px) rotate(12deg)}}
+.intro h1{font-size:clamp(53px,8.9vw,126px);line-height:.94;letter-spacing:-.075em;text-shadow:0 5px 40px #0007}
+.intro h1 span{background:linear-gradient(100deg,#9b67ff 4%,#f4cfff 42%,#62dfff 91%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 20px #9b65ff52)}
+.intro-copy p{line-height:1.8;font-weight:400}.intro-copy p strong{font-size:11px;letter-spacing:.17em;color:#a9dafa}
+.intro-features{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:23px;margin-top:22px;font-size:10px;letter-spacing:.24em;color:#b4a0e9;font-weight:800}
+.intro-badge{border-color:rgba(161,106,255,.55);box-shadow:0 0 25px #9255ff22;animation:badgeGlow 2.4s ease-in-out infinite alternate}
+@keyframes badgeGlow{to{box-shadow:0 0 36px #9255ff66}}
+.intro #startIntro{padding:16px 32px;box-shadow:0 0 38px #8648ff44;letter-spacing:.065em;transition:transform .25s,box-shadow .25s}.intro #startIntro:hover{transform:translateY(-4px) scale(1.035);box-shadow:0 0 56px #a46cff9c}
+.intro-stage{position:absolute;z-index:7;bottom:25px;left:28px;font-size:11px;letter-spacing:.26em;font-weight:800;color:#b5a8d1}
+.intro-progress{height:4px}.intro-progress i{box-shadow:0 0 18px #89b3ff}
+.site-awake .hero-art{animation:heroReveal 1.5s ease-out both}@keyframes heroReveal{from{opacity:.2;transform:translateY(26px) scale(.93)}to{opacity:1;transform:none}}
+.order-review-card{max-width:510px}.review-content{display:grid;gap:11px;margin:22px 0;padding:19px;border:1px solid rgba(165,104,255,.27);background:rgba(130,75,255,.09);border-radius:16px}.review-content strong{font-size:24px;color:#b9a0ff}.review-accept{display:flex;align-items:flex-start;gap:12px;font-size:13px;line-height:1.5;margin:18px 0}.review-accept input{accent-color:#995bff;width:18px;height:18px;flex:none}
+@media(max-width:650px){.intro-mark{width:80px;height:80px}.intro-mark-inner{width:56px;height:56px}.intro-features{gap:9px;letter-spacing:.12em}.intro-stage{bottom:30px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){.intro-copy,.intro-mark,.intro-badge{animation:none!important}}
+
+/* V3.1 - évite la superposition du titre avec la fusée pendant le lancement */
+.intro.running .intro-copy {
+  animation: none !important;
+  opacity: 0 !important;
+  transform: translateY(-24px) scale(.96);
+  transition: opacity .35s ease, transform .35s ease;
+  pointer-events: none;
+}
+.intro:not(.running) .intro-copy {
+  z-index: 8;
+}
+@media (max-width: 700px) {
+  .intro-copy { width: min(100%, 96vw); padding: 22px; }
+  .intro h1 { font-size: clamp(46px, 10vw, 77px); letter-spacing: -.055em; }
+}

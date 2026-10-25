@@ -3,6 +3,17 @@ const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clea
 // API Render: remplace seulement cette URL plus tard par ton vrai lien Render.
 const API_BASE="https://eclipsesmp-site.onrender.com/api"; // À remplacer par une URL de backend réelle. Aucun compte ni paiement actif sans backend.
 const TOKEN_KEY="eclipse_token";
+// La simple présence d'un jeton local n'autorise jamais un achat.
+let shopIdentity=null;
+function askShopLogin(){
+  toast(currentLang==="en"?"Log in with your verified Minecraft account first.":"Connecte-toi à ton compte Minecraft vérifié pour accéder à la boutique.");
+  toggleCart(false);
+  document.querySelector('[data-auth="login"]')?.click();
+  document.querySelector('#accountModal')?.classList.add('open');
+  refreshAccount();
+}
+function canShop(){if(shopIdentity?.linked)return true;askShopLogin();return false;}
+
 
 // background
 const space=$("#space"),ctx=space.getContext("2d");let stars=[];
@@ -36,19 +47,50 @@ function rocket(x,y,rot,scale,thrust){
 }
 function spawnExplosion(x,y){particles=Array.from({length:240},()=>{const a=Math.random()*Math.PI*2,s=2+Math.random()*9;return{x,y,a,s,r:1+Math.random()*4,c:Math.random()>.55?"#65e8ff":Math.random()>.35?"#9c62ff":"#fff"}})}
 function drawIntro(now){
- ix.clearRect(0,0,innerWidth,innerHeight);let t=state==="run"?(now-startTime)/1000:-1,followShift=0;const baseGy=innerHeight*.86;let p=0,rocketWorldX=innerWidth/2,rocketWorldY=baseGy-38,rot=0;
+ const stage=$("#introStage");if(stage&&state==="run"){
+   const secs=(now-startTime)/1000;
+   stage.textContent=secs<2.4?"01 / ALLUMAGE":secs<4.7?"02 / TRAVERSÉE":secs<7.7?"03 / ÉCLIPSE":"04 / BIENVENUE";
+ }
+ ix.clearRect(0,0,innerWidth,innerHeight);let t=state==="run"?(now-startTime)/1000:-1,followShift=0;const baseGy=innerHeight*.95;let p=0,rocketWorldX=innerWidth/2,rocketWorldY=baseGy-38,rot=0;
  if(state==="run"){p=clamp((t-.25)/4.45,0,1);const maxAmp=Math.min(innerWidth*.36,470),env=Math.sin(Math.PI*p);rocketWorldX=innerWidth/2+Math.sin(p*Math.PI*5.8)*maxAmp*env+Math.sin(p*Math.PI*12.1)*Math.min(94,innerWidth*.085)*p+Math.sin(p*Math.PI*2.6+.4)*Math.min(34,innerWidth*.04)*p;rocketWorldY=baseGy-38-ease(p)*(innerHeight*.80);if(p>.08)followShift=Math.max(0,innerHeight*.58-rocketWorldY);rot=clamp(Math.cos(p*Math.PI*5.8)*.65,-.72,.72)}
  const sky=ix.createLinearGradient(0,0,0,innerHeight);sky.addColorStop(0,"#02030a");sky.addColorStop(.5,"#09051a");sky.addColorStop(1,"#130419");ix.fillStyle=sky;ix.fillRect(0,0,innerWidth,innerHeight);
  for(let i=0;i<230;i++){const sx=(i*97.31)%innerWidth,sy=((i*53.17)%Math.max(1,innerHeight*1.5))-followShift*.14;if(sy<-4||sy>innerHeight+4)continue;ix.fillStyle=`rgba(225,230,255,${.2+.6*Math.abs(Math.sin(now*.001+i))})`;ix.fillRect(sx,sy,i%9===0?1.6:.8,i%9===0?1.6:.8)}
+ // Portail monumental, anneaux lumineux et météores cinématiques.
+ const cx=innerWidth/2, cy=innerHeight*.47;
+ const reveal=state==="idle"?.42:clamp((t-4.45)/1.7,0,1);
+ if(reveal>0){
+   ix.save();ix.globalAlpha=reveal;
+   const R=Math.min(innerWidth,innerHeight)*.19;
+   const outer=ix.createRadialGradient(cx,cy,R*.67,cx,cy,R*2.45);
+   outer.addColorStop(0,"rgba(100,55,255,.28)");outer.addColorStop(.5,"rgba(69,27,164,.19)");outer.addColorStop(1,"rgba(0,0,0,0)");
+   ix.fillStyle=outer;ix.beginPath();ix.arc(cx,cy,R*2.45,0,Math.PI*2);ix.fill();
+   for(let j=0;j<3;j++){
+     ix.save();ix.translate(cx,cy);ix.rotate(now*.00009*(j%2?1:-1)+j*1.1);ix.scale(1,.78+j*.06);
+     ix.strokeStyle=["rgba(123,80,255,.63)","rgba(74,219,255,.48)","rgba(211,147,255,.4)"][j];
+     ix.lineWidth=j===0?3:1.3;ix.setLineDash(j===2?[7,16]:[]);
+     ix.shadowBlur=22;ix.shadowColor=j===1?"#67dfff":"#995aff";
+     ix.beginPath();ix.ellipse(0,0,R*(1.14+j*.22),R*(1.14+j*.22),0,0,Math.PI*2);ix.stroke();ix.restore();
+   }
+   for(let j=0;j<58;j++){
+     const a=j*2.3999+now*.00015,rad=R*(1.4+(j%9)*.14);
+     ix.fillStyle=j%3===0?"rgba(100,235,255,.7)":"rgba(195,132,255,.65)";
+     ix.beginPath();ix.arc(cx+Math.cos(a)*rad,cy+Math.sin(a)*rad*.79,1+(j%4)*.45,0,Math.PI*2);ix.fill();
+   }
+   ix.restore();
+ }
+ if(state==="run"&&t>1.4&&t<5.3){ix.save();ix.globalAlpha=.20;
+   for(let j=0;j<38;j++){const x=(j*173.31+now*.11*(1+j%4))%innerWidth,y=(j*79.7+now*.31*(1+j%5))%innerHeight;
+     ix.strokeStyle=j%2?"#b88bff":"#75e7ff";ix.lineWidth=1+(j%3);ix.beginPath();ix.moveTo(x,y);ix.lineTo(x-35-j%22,y+74+j%40);ix.stroke()}
+   ix.restore()}
  const gy=baseGy+followShift;ix.fillStyle="#030306";ix.fillRect(0,gy,innerWidth,innerHeight-gy+120);ix.fillStyle="#11101a";ix.fillRect(innerWidth/2-86,gy-10,172,10);ix.fillRect(innerWidth/2-18,gy-118,36,108);
- if(state==="idle")rocket(innerWidth/2,gy-38,0,.92,.16);
+ if(state==="idle")rocket(innerWidth/2,baseGy-38,0,.46,.10);
  else if(state==="run"){const x=rocketWorldX,y=rocketWorldY+followShift;if(t<4.76)rocket(x,y,rot,.92,.82+.22*p);const ex=x,ey=y-118;if(t>=4.76){if(!exploded){exploded=true;spawnExplosion(ex,ey);boomSound();intro.classList.add("shock");setTimeout(()=>intro.classList.remove("shock"),650)}const bp=clamp((t-4.76)/1.45,0,1);const g=ix.createRadialGradient(ex,ey,0,ex,ey,230+bp*410);g.addColorStop(0,`rgba(255,255,255,${1-bp*.8})`);g.addColorStop(.34,`rgba(156,78,255,${.78-bp*.58})`);g.addColorStop(1,"rgba(0,0,0,0)");ix.fillStyle=g;ix.beginPath();ix.arc(ex,ey,250+bp*430,0,Math.PI*2);ix.fill()}
  const ep=clamp((t-5.65)/3,0,1);if(ep>0){const cx=innerWidth/2,cy=innerHeight/2-20,R=95;ix.save();ix.globalAlpha=ep;const halo=ix.createRadialGradient(cx,cy,0,cx,cy,320);halo.addColorStop(0,"rgba(255,255,255,.98)");halo.addColorStop(.18,"rgba(157,79,255,.86)");halo.addColorStop(1,"rgba(0,0,0,0)");ix.fillStyle=halo;ix.beginPath();ix.arc(cx,cy,320,0,Math.PI*2);ix.fill();ix.fillStyle="#f5ffff";ix.beginPath();ix.arc(cx,cy,R,0,Math.PI*2);ix.fill();const sweep=clamp((ep-.05)/.75,0,1),mx=cx-210+smooth(sweep)*225;ix.fillStyle="#000";ix.beginPath();ix.arc(mx,cy,R*.97,0,Math.PI*2);ix.fill();ix.restore()}
  const tp=clamp((t-7.7)/1.4,0,1);if(tp>0){ix.save();ix.globalAlpha=tp;ix.textAlign="center";ix.fillStyle="rgba(205,190,255,.9)";ix.font="800 13px Segoe UI";ix.fillText("BIENVENUE DANS L’ÉCLIPSE",innerWidth/2,innerHeight*.66);const gr=ix.createLinearGradient(innerWidth/2-230,0,innerWidth/2+230,0);gr.addColorStop(0,"#fff");gr.addColorStop(.55,"#bd83ff");gr.addColorStop(1,"#5de8ff");ix.fillStyle=gr;ix.font=`900 ${Math.min(108,innerWidth*.095)}px Segoe UI`;ix.fillText("ECLIPSESMP",innerWidth/2,innerHeight*.76);ix.fillStyle="#fff";ix.font="800 25px Segoe UI";ix.fillText("V2",innerWidth/2,innerHeight*.82);ix.restore()}if(t>10.7)endIntro()}
  requestAnimationFrame(drawIntro)
 }requestAnimationFrame(drawIntro);
-function endIntro(){state="done";intro.classList.add("done")}
-startBtn.onclick=async()=>{try{await $("#ambient").play()}catch(e){}updateSoundUI();$("#introCopy").style.pointerEvents="none";intro.classList.add("running");state="run";exploded=false;particles=[];startTime=performance.now();rocketSound()};skip.onclick=endIntro;
+function endIntro(){state="done";intro.classList.add("done");document.body.classList.add("site-awake")}
+startBtn.onclick=async()=>{if(window.matchMedia("(prefers-reduced-motion: reduce)").matches||localStorage.getItem("eclipse_reduced_motion")==="1"){endIntro();return;}try{await $("#ambient").play()}catch(e){}updateSoundUI();$("#introCopy").style.pointerEvents="none";intro.classList.add("running");state="run";exploded=false;particles=[];startTime=performance.now();rocketSound()};skip.onclick=endIntro;
 
 // audio/settings — fixed
 const audio=$("#ambient"),sound=$("#soundBtn"),toggle=$("#musicToggle"),vol=$("#volume"),vlabel=$("#volumeLabel");
@@ -144,7 +186,7 @@ const products = {
  vip:{name:"VIP · 30 jours",price:3.99,icon:"✦"},
  eclipse:{name:"Eclipse · 30 jours",price:7.99,icon:"◐"},
  nova:{name:"Nova · 30 jours",price:11.99,icon:"✧"},
- spawner:{name:"Clé Spawner",price:null,icon:"🧬",desc:"Spawners et récompenses de farm."},
+ spawner:{name:"Clé Spawner",price:1.99,icon:"🧬",desc:"Spawners et récompenses de farm."},
  keyEclipse:{name:"Clé Eclipse",price:2.25,icon:"🌑",desc:"Récompenses Eclipse."},
  keyNova:{name:"Clé Nova",price:2.99,icon:"💠",desc:"Récompenses Nova."},
  premium:{name:"Battle Pass Premium",price:null,icon:"⚔",desc:"Accès Premium pour la saison en cours. Tarif en euros à confirmer."},
@@ -161,6 +203,8 @@ let chosenGrade=singleGrades.find(id=>basket[id]);if(chosenGrade)for(const id of
 function persistCart(){try{localStorage.setItem(cartKey,JSON.stringify(basket))}catch{}}
 function addCart(id){
  if(!products[id])return;
+ if(!canShop())return;
+ if(products[id].price===null){toast("Prix à confirmer : cet article n’est pas encore disponible.");return;}
  if(singleGrades.includes(id)){
   for(const grade of singleGrades)delete basket[grade];
   basket[id]=1;
@@ -197,15 +241,34 @@ function refreshCart(){
  const count=entries.reduce((n,[,q])=>n+q,0);const badge=$("#cartBadge");badge.textContent=count;badge.hidden=count===0;
  $("#cartLines").innerHTML=entries.length?entries.map(([id,q])=>{const p=products[id];return `<div class="cart-line"><div class="cart-line-icon">${p.icon}</div><div class="cart-line-main"><strong>${p.name}</strong><small>${p.price===null?"Prix à confirmer":money(p.price)+" / unité"}</small><div class="cart-quantity"><button type="button" data-cart-action="minus" data-id="${id}" aria-label="Retirer une unité">−</button><span>${q}</span>${singlePurchase.includes(id)?"":`<button type="button" data-cart-action="plus" data-id="${id}" aria-label="Ajouter une unité">+</button>`}</div></div><div class="cart-line-right"><strong>${p.price===null?"—":money(p.price*q)}</strong><button type="button" class="cart-delete" data-cart-action="delete" data-id="${id}" aria-label="Supprimer cet article">×</button></div></div>`}).join(""):`<div class="cart-empty"><span>✧</span><strong>${currentLang==="en"?"Your cart is empty":"Ton panier est vide"}</strong><p>${currentLang==="en"?"Add products from the shop":"Ajoute des produits depuis la boutique"}</p></div>`;
  $("#cartTotal").textContent=money(entries.reduce((t,[id,q])=>t+(products[id].price||0)*q,0));
+ $("#cartCheckout").disabled=entries.length===0 || !shopIdentity?.linked;
+ $("#cartCheckout").textContent=shopIdentity?.linked?"VÉRIFIER MA COMMANDE":"CONNEXION REQUISE";
  $("#cartUnpriced").textContent=entries.some(([id])=>products[id].price===null)?(currentLang==="en"?"Some prices need confirmation.":"Certains prix restent à confirmer."):"";
- $("#cartLines").querySelectorAll("[data-cart-action]").forEach(el=>el.addEventListener("click",()=>{const {id,cartAction}=el.dataset;if(cartAction==="plus")basket[id]=singlePurchase.includes(id)?1:Math.min(99,(basket[id]||0)+1);if(cartAction==="minus")basket[id]=(basket[id]||0)-1;if(cartAction==="delete"||basket[id]<=0)delete basket[id];persistCart();refreshCart()}));
+ $("#cartLines").querySelectorAll("[data-cart-action]").forEach(el=>el.addEventListener("click",()=>{const {id,cartAction}=el.dataset;if(!canShop())return;if(cartAction==="plus")basket[id]=singlePurchase.includes(id)?1:Math.min(99,(basket[id]||0)+1);if(cartAction==="minus")basket[id]=(basket[id]||0)-1;if(cartAction==="delete"||basket[id]<=0)delete basket[id];persistCart();refreshCart()}));
 }
-function toggleCart(force){const next=typeof force==="boolean"?force:!cartModal.classList.contains("open");cartModal.classList.toggle("open",next);cartModal.setAttribute("aria-hidden",String(!next));$("#openCart").setAttribute("aria-expanded",String(next));if(next){refreshCart();refreshPurpose()}}
+function toggleCart(force){if(force!==false && !shopIdentity?.linked){askShopLogin();return;}const next=typeof force==="boolean"?force:!cartModal.classList.contains("open");cartModal.classList.toggle("open",next);cartModal.setAttribute("aria-hidden",String(!next));$("#openCart").setAttribute("aria-expanded",String(next));if(next){refreshCart();refreshPurpose()}}
 $("#openCart").onclick=()=>toggleCart();$("#closeCart").onclick=()=>toggleCart(false);
 document.addEventListener("pointerdown",e=>{if(cartModal.classList.contains("open")&&!cartModal.contains(e.target)&&!$("#openCart").contains(e.target))toggleCart(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleCart(false)});
 $$(".rank .add-cart").forEach(b=>b.onclick=()=>addCart(b.dataset.product));
-$("#cartCheckout").onclick=()=>toast(currentLang==="en"?"Payments not configured yet":"Paiements non configurés pour le moment");
+$("#cartCheckout").onclick=()=>{
+ if(!canShop())return;
+ const entries=Object.entries(basket).filter(([id,q])=>q>0&&products[id]);
+ if(!entries.length)return toast("Ton panier est vide.");
+ if(entries.some(([id])=>products[id].price===null))return toast("Un prix doit être confirmé.");
+ if(orderPurpose==="gift"&&!/^[.a-zA-Z0-9_ -]{3,32}$/.test(giftRecipient))return toast("Entre un pseudo Minecraft valide pour le cadeau.");
+ const summary=entries.map(([id,n])=>`${products[id].name} × ${n}`).join(" · ");
+ $("#orderReviewItems").textContent=summary;
+ $("#orderReviewRecipient").textContent=orderPurpose==="gift"?`Cadeau pour ${giftRecipient}`:`Pour mon compte ${shopIdentity.minecraft_username}`;
+ $("#orderReviewTotal").textContent=money(entries.reduce((t,[id,n])=>t+products[id].price*n,0));
+ $("#orderReviewAccept").checked=false;
+ $("#orderReviewContinue").disabled=true;
+ $("#orderReviewModal").classList.add("open");
+};
+$("#orderReviewBack").onclick=()=>$("#orderReviewModal").classList.remove("open");
+$("#orderReviewClose").onclick=()=>$("#orderReviewModal").classList.remove("open");
+$("#orderReviewAccept").onchange=e=>{$("#orderReviewContinue").disabled=!e.target.checked};
+$("#orderReviewContinue").onclick=()=>toast("Paiements non activés : aucune commande n’a été passée.");
 $("#passInfo").onclick=()=>addCart("premium");
 $$ ("[data-extra-product]").forEach(b=>b.onclick=()=>addCart(b.dataset.extraProduct));
 window.eclipseCartReady=true;renderCrates();refreshCart();
@@ -223,14 +286,45 @@ $("#accountBtn").onclick=()=>{acc.classList.add("open");refreshAccount()};
 $$('[data-close="account"]').forEach(b=>b.onclick=()=>acc.classList.remove("open"));
 $$(".auth-tab").forEach(b=>b.onclick=()=>{$$(".auth-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("#loginForm").classList.toggle("hidden",b.dataset.auth!=="login");$("#registerForm").classList.toggle("hidden",b.dataset.auth!=="register")});
 
-$("#registerForm").onsubmit=async e=>{
- e.preventDefault();const s=$("#registerStatus"),p=$("#registerPassword").value,p2=$("#registerPassword2").value;
- if(p!==p2){s.textContent="Les mots de passe ne correspondent pas.";return}
+// Inscription vérifiée d'abord en jeu. Aucun e-mail ou mot de passe n'est demandé avant /link.
+let signupTicket=null;
+function setRegistrationStep(n){
+ ["registrationStart","registrationVerify","registrationFinish"].forEach((id,i)=>$("#"+id).classList.toggle("hidden",i!==n));
+ ["regStepOne","regStepTwo","regStepThree"].forEach((id,i)=>$("#"+id).classList.toggle("step-current",i===n));
+}
+async function signupApi(path,body){
+ const r=await fetch(`${API_BASE}${path}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+ const d=await r.json();if(!r.ok)throw Error(d.error||"Service indisponible");return d;
+}
+$("#registrationGenerate").onclick=async()=>{
+ const status=$("#registerStatus");status.textContent="";
+ const name=$("#registerMinecraft").value.trim();
+ if(!/^[.a-zA-Z0-9_ -]{3,32}$/.test(name)){status.textContent="Pseudo invalide : utilise ton pseudo exact en jeu.";return}
  try{
-  const r=await fetch(`${API_BASE}/auth/register`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("#registerEmail").value.trim(),minecraftUsername:$("#registerMinecraft").value.trim(),password:p})});
-  const d=await r.json();if(!r.ok)throw new Error(d.error||"Erreur");
-  s.textContent="Compte créé. Vérifie ton e-mail avant de te connecter.";
- }catch(err){s.textContent=err.message==="Failed to fetch"?"Le backend Render n'est pas encore connecté.":err.message}
+  const d=await signupApi('/signup/start',{minecraftUsername:name});signupTicket=d.ticket;
+  $("#registrationCommand").textContent=d.command;setRegistrationStep(1);
+  status.textContent="Code généré. Exécute la commande depuis ton compte Minecraft.";
+ }catch(e){status.textContent=e.message}
+};
+$("#registrationCopy").onclick=()=>{navigator.clipboard?.writeText($("#registrationCommand").textContent).then(()=>{$("#registerStatus").textContent="Commande copiée !"}).catch(()=>{$("#registerStatus").textContent="Sélectionne la commande pour la copier."})};
+$("#registrationRestart").onclick=()=>{signupTicket=null;setRegistrationStep(0);$("#registerStatus").textContent=""};
+$("#registrationCheck").onclick=async()=>{
+ const status=$("#registerStatus");
+ try{
+  const d=await signupApi('/signup/status',{ticket:signupTicket});
+  if(!d.verified){status.textContent="Pas encore vérifié. Tape la commande sur EclipseSMP, puis réessaie.";return}
+  $("#registrationVerifiedName").textContent=`✓ Minecraft vérifié : ${d.minecraftUsername}`;
+  setRegistrationStep(2);status.textContent="Identité confirmée ! Tu peux maintenant créer ton compte.";
+ }catch(e){status.textContent=e.message}
+};
+$("#registrationFinish").onsubmit=async e=>{
+ e.preventDefault();const status=$("#registerStatus"),p=$("#registerPassword").value;
+ if(p!==$("#registerPassword2").value){status.textContent="Les mots de passe ne correspondent pas.";return}
+ try{
+  await signupApi('/auth/register',{ticket:signupTicket,email:$("#registerEmail").value.trim(),password:p});
+  signupTicket=null;status.textContent="Compte créé ! Vérifie ton e-mail pour activer ton compte.";
+  $("#registrationFinish").querySelectorAll('input').forEach(i=>i.value='');
+ }catch(err){status.textContent=err.message}
 };
 
 $("#loginForm").onsubmit=async e=>{
@@ -243,20 +337,22 @@ $("#loginForm").onsubmit=async e=>{
 };
 
 async function refreshAccount(){
+ shopIdentity=null;
  const token=localStorage.getItem(TOKEN_KEY),auth=$("#authArea"),profile=$("#profileArea");
  auth.classList.toggle("hidden",!!token);profile.classList.toggle("hidden",!token);
- if(!token)return;
+ if(!token){refreshCart();return;}
  try{
   const r=await fetch(`${API_BASE}/me`,{headers:{Authorization:`Bearer ${token}`}});
   const d=await r.json();if(!r.ok)throw new Error();
+  shopIdentity=d.linked?d:null;refreshCart();
   $("#profileName").textContent=d.minecraft_username||d.email;
   $("#profileRank").textContent=d.rank_name||"default";
   $("#profileMoney").textContent=d.money??0;$("#profileShards").textContent=d.shards??0;
   $("#profileKills").textContent=d.kills??0;$("#profileDeaths").textContent=d.deaths??0;
   $("#profilePlaytime").textContent=d.playtime||"0h";
- }catch{localStorage.removeItem(TOKEN_KEY);auth.classList.remove("hidden");profile.classList.add("hidden")}
+ }catch{shopIdentity=null;refreshCart();localStorage.removeItem(TOKEN_KEY);auth.classList.remove("hidden");profile.classList.add("hidden")}
 }
-$("#logoutBtn").onclick=()=>{localStorage.removeItem(TOKEN_KEY);localStorage.removeItem("eclipse_refresh_token");refreshAccount()};
+$("#logoutBtn").onclick=()=>{shopIdentity=null;basket={};persistCart();refreshCart();localStorage.removeItem(TOKEN_KEY);localStorage.removeItem("eclipse_refresh_token");refreshAccount()};
 
 // SCORE TABLE
 let currentScore="money";
@@ -291,3 +387,9 @@ if(hashParams.get('access_token')&&hashParams.get('type')==='recovery'){
  localStorage.setItem(TOKEN_KEY,hashParams.get('access_token'));history.replaceState({},'',location.pathname+location.search);document.getElementById('accountModal')?.classList.add('open');document.getElementById('resetHelp')?.classList.remove('hidden');document.getElementById('authArea')?.classList.remove('hidden');document.getElementById('profileArea')?.classList.add('hidden');document.getElementById('loginForm')?.classList.add('hidden');document.getElementById('registerForm')?.classList.add('hidden');document.getElementById('newPasswordBox')?.classList.remove('hidden');
 }
 const resetSubmit=document.getElementById('changeRecoveredPassword');if(resetSubmit)resetSubmit.onclick=async()=>{const status=document.getElementById('resetStatus');try{await eclipseRequest('/auth/update-password',localStorage.getItem(TOKEN_KEY),{password:document.getElementById('recoveredPassword').value});status.textContent='Mot de passe modifié.'}catch(e){status.textContent=e.message}};
+
+// Le backend /api/checkout vérifie lui aussi la session et n’accepte aucun paiement sans prestataire configuré.
+addEventListener("focus",()=>{if(localStorage.getItem(TOKEN_KEY))refreshAccount()});
+
+// Restore a verified account after a page refresh.
+if(localStorage.getItem(TOKEN_KEY))refreshAccount();

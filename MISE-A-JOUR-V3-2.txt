@@ -1,0 +1,4 @@
+EclipseSMP V3.2 - Pack complet avec fusee centree.
+Pour une mise a jour du site, remplacer index.html, script.js et style.css a la racine du depot GitHub.
+Les dossiers backend et minecraft-plugin-source sont inclus pour completude mais ne sont pas a reinstaller pour ce correctif visuel.
+La connexion Minecraft demande encore l installation/configuration du plugin et des tests.
