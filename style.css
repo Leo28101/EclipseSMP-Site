@@ -153,3 +153,43 @@ footer{width:min(1180px,calc(100% - 38px));margin:30px auto 0;padding:35px 0 55p
   .intro-copy { width: min(100%, 96vw); padding: 22px; }
   .intro h1 { font-size: clamp(46px, 10vw, 77px); letter-spacing: -.055em; }
 }
+
+/* Profil EclipseSMP v3.3 — espace personnel / skin dans le menu */
+.account-nav-btn{display:inline-grid;place-items:center;position:relative;overflow:hidden;padding:2px;border-color:rgba(179,124,255,.45)}
+.account-nav-btn img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated;border-radius:9px}
+.account-nav-btn:has(img:not(.hidden)){box-shadow:0 0 0 2px rgba(157,95,255,.15),0 0 18px rgba(143,81,243,.3)}
+.eclipse-profile-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border:1px solid #7951d566;border-radius:16px;background:linear-gradient(100deg,#281447,#080a1d);font-size:11px;font-weight:800;letter-spacing:.14em;color:#debcff}
+.eclipse-profile-live{color:#8de7bd;font-size:9px;letter-spacing:.09em}
+.eclipse-profile-hero{display:flex;align-items:center;gap:20px;padding:24px 0 14px}
+.eclipse-profile-skin{width:99px;height:99px;min-width:99px;display:grid;place-items:center;border-radius:22px;border:2px solid rgba(192,143,255,.6);box-shadow:0 0 28px #8038dc3e;background:radial-gradient(circle at 30% 10%,#37195a,#0d0917);overflow:hidden}
+.eclipse-profile-skin img{width:100%;height:100%;object-fit:cover;image-rendering:pixelated}
+.eclipse-profile-skin span{font-size:44px;color:#be8eff}
+.eclipse-profile-hero h3{margin:6px 0!important;overflow-wrap:anywhere}
+.eclipse-profile-link{display:inline-block;color:#7ce6b1;font-size:12px}
+.eclipse-profile-info{display:grid;grid-template-columns:1fr 1.3fr;gap:10px;margin:5px 0 22px}
+.eclipse-profile-info>div{border:1px solid #ffffff18;background:#ffffff08;border-radius:13px;padding:14px;min-width:0}
+.eclipse-profile-info span{display:block;color:#aaa0bd;font-size:10px;letter-spacing:.1em;margin-bottom:7px}
+.eclipse-profile-info b{display:block;color:#f7f0ff;font-size:13px;overflow-wrap:anywhere}
+.eclipse-profile-subtitle{font-size:12px;letter-spacing:.15em;color:#bfa4f4;margin:20px 0 5px}
+#profileArea .profile-grid>div{background:linear-gradient(125deg,#25133b77,#101126);border:1px solid #a465ff30;padding:16px}
+#profileArea .profile-grid b{font-size:17px}
+#profileArea #profileRefresh{margin:8px 0}
+@media(max-width:560px){.eclipse-profile-info{grid-template-columns:1fr}.eclipse-profile-banner{flex-wrap:wrap}.eclipse-profile-hero{gap:12px}.eclipse-profile-skin{width:78px;height:78px;min-width:78px}}
+
+/* ECLIPSESMP ID V3.4 — connexion et espace administrateur */
+#accountModal .modal-card{background:radial-gradient(circle at 85% 0%,rgba(112,64,255,.2),transparent 40%),linear-gradient(145deg,#140b26,#080713 72%);border:1px solid rgba(187,141,255,.36);box-shadow:0 36px 110px #000b,0 0 70px #7345ff14}
+#accountModal .account-logo{width:66px;height:66px;display:grid;place-items:center;border-radius:20px;background:linear-gradient(150deg,#9e59fc,#314fbf);box-shadow:0 12px 40px #7540ed6a;color:white;margin-bottom:18px}
+#accountModal .auth-tabs{background:#08071580;padding:5px;border-radius:16px;border:1px solid #ffffff16;margin:22px 0}
+#accountModal .auth-tab{flex:1;border:0;background:transparent;border-radius:12px;font-weight:700}
+#accountModal .auth-tab.active{background:linear-gradient(110deg,#7e3fe5,#334fbb);box-shadow:0 5px 22px #6548e046}
+#accountModal .auth-form label,#accountModal #registrationFinish label{display:flex;flex-direction:column;gap:8px;margin:10px 0 14px;color:#c5b8df;font-weight:600;font-size:12px}
+#accountModal input{min-height:46px;background:#090916;border:1px solid #66548d65;color:#f7f0ff;border-radius:12px;padding:12px 14px;outline:none;transition:border-color .2s,box-shadow .2s}
+#accountModal input:focus{border-color:#9d81fe;box-shadow:0 0 0 3px #8658ee24}
+#accountModal .btn.primary{min-height:48px;border-radius:12px}
+.registration-email-notice{margin:18px 0;padding:20px;border-radius:16px;background:linear-gradient(120deg,#13493855,#21275550);border:1px solid #46d4aa66;line-height:1.7}
+.registration-email-notice strong{color:#8df7c8}.registration-email-notice p{color:#c8d5e2;font-size:13px}
+.account-security-note{margin:16px 0;padding:16px;border:1px solid #725cab55;background:#6552ab18;border-radius:13px;color:#b9b6cb;font-size:12px;line-height:1.6}
+.admin-panel{width:min(850px,calc(100% - 24px))}.admin-rows{display:grid;gap:9px;margin:16px 0;max-height:48vh;overflow-y:auto}
+.admin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #ffffff1a;background:#ffffff08;border-radius:12px;padding:14px}
+.admin-row strong,.admin-row small{display:block;overflow-wrap:anywhere}.admin-row small{font-size:12px;color:#afa5c5;margin-top:6px}.admin-row button{width:auto;min-width:115px}
+@media(max-width:600px){#accountModal .modal-card{padding:25px 18px}.admin-row{flex-direction:column;align-items:stretch}}

@@ -1,0 +1,8 @@
+# NEVER commit a real secret to a public repository.
+backend-url: "https://eclipsesmp-site.onrender.com"
+secret: "REPLACE_WITH_MINECRAFT_SYNC_SECRET_FROM_RENDER"
+# Optional: install PlaceholderAPI and configure confirmed numeric placeholders.
+# Leave empty until EconomyModern placeholders are verified.
+money-placeholder: ""
+shards-placeholder: ""
+stats-interval-seconds: 60

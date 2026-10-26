@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#05030c">
   <title>EclipseSMP — V2</title>
-  <link rel="stylesheet" href="style.css?v=32">
+  <link rel="stylesheet" href="style.css?v=34">
 </head>
 <body>
   <audio id="ambient" src="ambient.mp3" loop preload="auto"></audio>
@@ -37,7 +37,7 @@
     <div class="actions">
       <button id="langBtn" class="langbtn" title="Langue / Language">FR</button>
       <button id="openCart" class="iconbtn nav-cart" type="button" aria-label="Ouvrir le panier" aria-expanded="false" title="Panier"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.5 13h12l2.5-9H6"/></svg><span id="cartBadge" class="cart-badge" hidden>0</span></button>
-      <button id="accountBtn" class="iconbtn" title="Compte">👤</button>
+      <button id="accountBtn" class="iconbtn account-nav-btn" type="button" title="Connexion / Mon compte" aria-label="Connexion / Mon compte"><span id="accountBtnFallback">👤</span><img id="accountBtnSkin" class="hidden" alt="Skin Minecraft du compte connecté" referrerpolicy="no-referrer"></button>
       <button id="soundBtn" class="iconbtn" title="Musique">🔇</button>
       <button id="settingsBtn" class="iconbtn" title="Paramètres">⚙</button>
     </div>
@@ -228,27 +228,26 @@
             <button class="btn primary full" type="submit">CRÉER MON COMPTE</button>
           </form>
           <p id="registerStatus" class="status" role="status" aria-live="polite"></p>
+          <div id="registrationEmailNotice" class="registration-email-notice hidden"><strong>📩 Confirme ton adresse e-mail</strong><p>Nous avons demandé l'envoi d'un lien de validation. Ouvre l'e-mail, clique sur le lien, puis reviens te connecter. Pense à vérifier les spams.</p><button type="button" id="resendSignupEmail" class="btn ghost full">RENVOYER L'E-MAIL</button><p id="resendSignupStatus" class="status"></p></div>
         </div>
         <div id="resetHelp" class="reset-help hidden"><h4>Réinitialisation du mot de passe</h4><p>Entre ton e-mail pour demander un lien de récupération sécurisé.</p><label>Adresse e-mail<input type="email" id="recoveryEmail" placeholder="ton@email.fr"></label><button type="button" class="btn primary full" id="sendRecovery">ENVOYER UN LIEN</button><p id="resetStatus" class="status"></p><div id="newPasswordBox" class="hidden"><label>Nouveau mot de passe<input type="password" id="recoveredPassword" minlength="8"></label><button type="button" class="btn primary full" id="changeRecoveredPassword">CHANGER LE MOT DE PASSE</button></div><button type="button" class="btn ghost full" id="resetBack">Retour à la connexion</button></div>
       </div>
 
       <div id="profileArea" class="hidden">
-        <div class="account-logo">◐</div>
-        <small>MON PROFIL</small>
-        <h3 id="profileName">Joueur</h3>
-        <div class="profile-grid">
-          <div><span>Grade</span><b id="profileRank">default</b></div>
-          <div><span>Argent</span><b id="profileMoney">0</b></div>
-          <div><span>Gemmes</span><b id="profileShards">0</b></div>
-          <div><span>Kills</span><b id="profileKills">0</b></div>
-          <div><span>Morts</span><b id="profileDeaths">0</b></div>
-          <div><span>Temps</span><b id="profilePlaytime">0h</b></div>
+        <div class="eclipse-profile-banner"><span>✦ ECLIPSESMP ID</span><span class="eclipse-profile-live">● COMPTE CONNECTÉ</span></div>
+        <div class="eclipse-profile-hero">
+          <div class="eclipse-profile-skin"><img id="profileSkin" alt="Tête du skin Minecraft" referrerpolicy="no-referrer"><span id="profileSkinFallback">◐</span></div>
+          <div><small>MON ESPACE PERSONNEL</small><h3 id="profileName">Joueur</h3><span id="profileLinkedStatus" class="eclipse-profile-link">Vérification en cours…</span></div>
         </div>
-        <div style="margin:18px 0;display:grid;gap:10px"><button id="requestLinkCode" class="btn primary full" type="button">LIER MON COMPTE MINECRAFT</button><p id="linkStatus" class="status" style="overflow-wrap:anywhere"></p></div><button id="logoutBtn" class="btn ghost full" data-i18n="logout">SE DÉCONNECTER</button>
+        <div class="eclipse-profile-info"><div><span>PSEUDO MINECRAFT</span><b id="profileMinecraft">—</b></div><div><span>ADRESSE E-MAIL (PRIVÉE)</span><b id="profileEmail">—</b></div></div>
+        <div class="account-security-note">🔐 Tes données de connexion restent privées. Ton profil Minecraft et ton adresse e-mail sont visibles ici uniquement par toi.</div>
+        <button type="button" id="profileAdminBtn" class="btn ghost full hidden">⚙ Administration EclipseSMP</button>
+        <div style="margin:18px 0;display:grid;gap:10px"><button id="requestLinkCode" class="btn primary full" type="button">LIER MON COMPTE MINECRAFT</button><p id="linkStatus" class="status" style="overflow-wrap:anywhere"></p></div><button id="profileRefresh" class="btn ghost full" type="button">↻ ACTUALISER MES INFORMATIONS</button><button id="logoutBtn" class="btn ghost full" data-i18n="logout">SE DÉCONNECTER</button>
       </div>
     </div>
   </div>
 
+  <div id="adminModal" class="modal"><div class="shade" data-close="admin"></div><div class="modal-card admin-panel"><button class="close" data-close="admin">×</button><small>ECLIPSESMP • ACCÈS RÉSERVÉ</small><h3>Administration</h3><p class="register-hint">Comptes et achats. Les mots de passe ne sont jamais visibles, même pour le fondateur.</p><div class="auth-tabs"><button type="button" class="auth-tab active" id="adminTabAccounts">Comptes</button><button type="button" class="auth-tab" id="adminTabOrders">Achats</button></div><p id="adminStatus" class="status"></p><div id="adminRows" class="admin-rows"></div><button id="adminRefresh" type="button" class="btn ghost full">↻ Actualiser</button></div></div>
   <!-- SETTINGS conservés, sauf Microsoft Client ID retiré -->
   <aside id="settings" class="settings">
     <div class="settings-head"><div><small>ECLIPSESMP</small><h3>Paramètres</h3></div><button id="closeSettings" class="close static">×</button></div>
@@ -259,6 +258,6 @@
 
   <div id="settingsShade" class="settings-shade"></div>
   <div id="toast" class="toast"></div>
-  <script src="script.js?v=32"></script>
+  <script src="script.js?v=34"></script>
 </body>
 </html>

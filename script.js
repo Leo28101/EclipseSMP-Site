@@ -288,6 +288,9 @@ $$(".auth-tab").forEach(b=>b.onclick=()=>{$$(".auth-tab").forEach(x=>x.classList
 
 // Inscription vérifiée d'abord en jeu. Aucun e-mail ou mot de passe n'est demandé avant /link.
 let signupTicket=null;
+let registrationPoller=null;
+let pendingConfirmationEmail="";
+function stopRegistrationPoll(){if(registrationPoller){clearInterval(registrationPoller);registrationPoller=null}}
 function setRegistrationStep(n){
  ["registrationStart","registrationVerify","registrationFinish"].forEach((id,i)=>$("#"+id).classList.toggle("hidden",i!==n));
  ["regStepOne","regStepTwo","regStepThree"].forEach((id,i)=>$("#"+id).classList.toggle("step-current",i===n));
@@ -303,26 +306,37 @@ $("#registrationGenerate").onclick=async()=>{
  try{
   const d=await signupApi('/signup/start',{minecraftUsername:name});signupTicket=d.ticket;
   $("#registrationCommand").textContent=d.command;setRegistrationStep(1);
+  stopRegistrationPoll();registrationPoller=setInterval(()=>{if(signupTicket&&!document.getElementById("registrationVerify").classList.contains("hidden"))checkMinecraftVerified(true)},3000);
   status.textContent="Code généré. Exécute la commande depuis ton compte Minecraft.";
  }catch(e){status.textContent=e.message}
 };
 $("#registrationCopy").onclick=()=>{navigator.clipboard?.writeText($("#registrationCommand").textContent).then(()=>{$("#registerStatus").textContent="Commande copiée !"}).catch(()=>{$("#registerStatus").textContent="Sélectionne la commande pour la copier."})};
-$("#registrationRestart").onclick=()=>{signupTicket=null;setRegistrationStep(0);$("#registerStatus").textContent=""};
-$("#registrationCheck").onclick=async()=>{
- const status=$("#registerStatus");
+$("#registrationRestart").onclick=()=>{stopRegistrationPoll();signupTicket=null;setRegistrationStep(0);$("#registerStatus").textContent=""};
+let checkingMinecraft=false;
+async function checkMinecraftVerified(quiet=false){
+ if(!signupTicket||checkingMinecraft)return;
+ checkingMinecraft=true;const status=$("#registerStatus");
  try{
   const d=await signupApi('/signup/status',{ticket:signupTicket});
-  if(!d.verified){status.textContent="Pas encore vérifié. Tape la commande sur EclipseSMP, puis réessaie.";return}
+  if(!d.verified){if(!quiet)status.textContent="En attente de /link…";return}
+  stopRegistrationPoll();
   $("#registrationVerifiedName").textContent=`✓ Minecraft vérifié : ${d.minecraftUsername}`;
-  setRegistrationStep(2);status.textContent="Identité confirmée ! Tu peux maintenant créer ton compte.";
- }catch(e){status.textContent=e.message}
-};
+  setRegistrationStep(2);status.textContent="Minecraft confirmé ! Termine la création de ton compte.";
+ }catch(e){if(!quiet)status.textContent=e.message}
+ finally{checkingMinecraft=false}
+}
+$("#registrationCheck").onclick=()=>checkMinecraftVerified(false);
+addEventListener('focus',()=>{if(signupTicket&&!$("#registrationVerify").classList.contains('hidden'))checkMinecraftVerified(true)});
 $("#registrationFinish").onsubmit=async e=>{
  e.preventDefault();const status=$("#registerStatus"),p=$("#registerPassword").value;
  if(p!==$("#registerPassword2").value){status.textContent="Les mots de passe ne correspondent pas.";return}
  try{
-  await signupApi('/auth/register',{ticket:signupTicket,email:$("#registerEmail").value.trim(),password:p});
-  signupTicket=null;status.textContent="Compte créé ! Vérifie ton e-mail pour activer ton compte.";
+  const email=$("#registerEmail").value.trim();
+  await signupApi('/auth/register',{ticket:signupTicket,email,password:p});
+  stopRegistrationPoll();signupTicket=null;pendingConfirmationEmail=email;
+  $("#registrationFinish").classList.add('hidden');
+  $("#registrationEmailNotice").classList.remove('hidden');
+  status.textContent="Inscription enregistrée. Consulte ton e-mail pour confirmer ton compte.";
   $("#registrationFinish").querySelectorAll('input').forEach(i=>i.value='');
  }catch(err){status.textContent=err.message}
 };
@@ -336,22 +350,47 @@ $("#loginForm").onsubmit=async e=>{
  }catch(err){s.textContent=err.message==="Failed to fetch"?"Le backend Render n'est pas encore connecté.":err.message}
 };
 
+// Les skins sont purement visuels ; seule la réponse authentifiée de /api/me
+// décide du compte lié et de l'accès à la boutique.
+function setAccountSkin(data){
+ const navImg=document.getElementById('accountBtnSkin');
+ const navFallback=document.getElementById('accountBtnFallback');
+ const profileImg=document.getElementById('profileSkin');
+ const profileFallback=document.getElementById('profileSkinFallback');
+ const uuid=(data?.minecraft_uuid||'').replace(/-/g,'');
+ const username=String(data?.minecraft_username||'');
+ const identifier=/^[0-9a-f]{32}$/i.test(uuid)?uuid:(/^[.a-zA-Z0-9_]{3,32}$/.test(username)?username:null);
+ if(!identifier){
+  navImg.classList.add('hidden');navImg.removeAttribute('src');navFallback.classList.remove('hidden');
+  profileImg.classList.add('hidden');profileImg.removeAttribute('src');profileFallback.classList.remove('hidden');
+  return;
+ }
+ const url='https://mc-heads.net/avatar/'+encodeURIComponent(identifier)+'/128';
+ navImg.onerror=()=>{navImg.classList.add('hidden');navFallback.classList.remove('hidden')};
+ profileImg.onerror=()=>{profileImg.classList.add('hidden');profileFallback.classList.remove('hidden')};
+ navImg.src=url;profileImg.src=url;
+ navImg.classList.remove('hidden');profileImg.classList.remove('hidden');
+ navFallback.classList.add('hidden');profileFallback.classList.add('hidden');
+}
 async function refreshAccount(){
  shopIdentity=null;
  const token=localStorage.getItem(TOKEN_KEY),auth=$("#authArea"),profile=$("#profileArea");
  auth.classList.toggle("hidden",!!token);profile.classList.toggle("hidden",!token);
- if(!token){refreshCart();return;}
+ if(!token){setAccountSkin(null);refreshCart();return;}
  try{
   const r=await fetch(`${API_BASE}/me`,{headers:{Authorization:`Bearer ${token}`}});
   const d=await r.json();if(!r.ok)throw new Error();
   shopIdentity=d.linked?d:null;refreshCart();
+  setAccountSkin(d.linked?d:null);
+  $("#profileEmail").textContent=d.email||"—";
+  $("#profileMinecraft").textContent=d.minecraft_username||"Non lié";
+  $("#profileLinkedStatus").textContent=d.linked?"✓ Minecraft lié":"⚠ Compte Minecraft non lié";
   $("#profileName").textContent=d.minecraft_username||d.email;
-  $("#profileRank").textContent=d.rank_name||"default";
-  $("#profileMoney").textContent=d.money??0;$("#profileShards").textContent=d.shards??0;
-  $("#profileKills").textContent=d.kills??0;$("#profileDeaths").textContent=d.deaths??0;
-  $("#profilePlaytime").textContent=d.playtime||"0h";
- }catch{shopIdentity=null;refreshCart();localStorage.removeItem(TOKEN_KEY);auth.classList.remove("hidden");profile.classList.add("hidden")}
+  const adminBtn=document.getElementById('profileAdminBtn');
+  if(adminBtn)adminBtn.classList.toggle('hidden',!d.isAdmin);
+ }catch{shopIdentity=null;setAccountSkin(null);refreshCart();localStorage.removeItem(TOKEN_KEY);auth.classList.remove("hidden");profile.classList.add("hidden")}
 }
+$("#profileRefresh").onclick=()=>refreshAccount();
 $("#logoutBtn").onclick=()=>{shopIdentity=null;basket={};persistCart();refreshCart();localStorage.removeItem(TOKEN_KEY);localStorage.removeItem("eclipse_refresh_token");refreshAccount()};
 
 // SCORE TABLE
@@ -376,6 +415,26 @@ setReducedMotion(reduced.checked);reduced.addEventListener('change',()=>setReduc
 $("#forgotPassword").onclick=()=>{$("#loginForm").classList.add('hidden');$("#registerForm").classList.add('hidden');$("#resetHelp").classList.remove('hidden');};
 $("#resetBack").onclick=()=>{$("#resetHelp").classList.add('hidden');$("#loginForm").classList.remove('hidden')};
 
+// Après confirmation e-mail, Supabase redirige vers la page publique.
+// La confirmation se fait côté Supabase, puis le joueur se connecte normalement.
+const confirmParams=new URLSearchParams(location.hash.replace(/^#/,''));
+const confirmQuery=new URLSearchParams(location.search);
+if((confirmParams.get('type')==='signup'||confirmQuery.get('confirmed')==='1')&&!confirmParams.get('error')){
+ document.querySelector('#accountModal')?.classList.add('open');
+ document.querySelector('[data-auth="login"]')?.click();
+ document.getElementById('loginStatus').textContent='E-mail confirmé. Connecte-toi avec ton adresse et ton mot de passe.';
+ history.replaceState({},'',location.pathname);
+}
+if(confirmParams.get('error')||confirmQuery.get('error')){
+ document.querySelector('#accountModal')?.classList.add('open');
+ document.getElementById('loginStatus').textContent='Lien expiré ou invalide. Tu peux demander un nouvel e-mail de confirmation.';
+}
+const resendBtn=document.getElementById('resendSignupEmail');
+if(resendBtn)resendBtn.onclick=async()=>{
+ const msg=document.getElementById('resendSignupStatus');
+ try{const d=await eclipseRequest('/auth/resend-confirmation',null,{email:pendingConfirmationEmail});msg.textContent=d.message}
+ catch(e){msg.textContent=e.message}
+};
 // New account linking and recovery UI. Supabase confirmation links use the configured Site URL.
 async function eclipseRequest(path,token,body){const r=await fetch(`${API_BASE}${path}`,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify(body||{})});const d=await r.json();if(!r.ok)throw Error(d.error||'Requête impossible');return d}
 const requestCode=document.getElementById('requestLinkCode');
@@ -393,3 +452,39 @@ addEventListener("focus",()=>{if(localStorage.getItem(TOKEN_KEY))refreshAccount(
 
 // Restore a verified account after a page refresh.
 if(localStorage.getItem(TOKEN_KEY))refreshAccount();
+
+// Console d'administration : toutes les données sont protégées par l'API côté serveur.
+let adminMode='accounts';
+async function adminRequest(path,options={}){
+ const r=await fetch(API_BASE+'/admin/'+path,{...options,headers:{Authorization:'Bearer '+localStorage.getItem(TOKEN_KEY),'Content-Type':'application/json',...(options.headers||{})}});
+ const d=await r.json();if(!r.ok)throw Error(d.error||'Accès refusé');return d;
+}
+async function loadAdmin(){
+ const box=document.getElementById('adminRows'),status=document.getElementById('adminStatus');
+ box.replaceChildren();status.textContent='Chargement…';
+ try{
+  const d=await adminRequest(adminMode==='accounts'?'accounts':'orders');status.textContent='';
+  if(!d.items.length){box.textContent='Aucune donnée pour le moment.';return}
+  for(const item of d.items){
+   const row=document.createElement('div');row.className='admin-row';
+   const info=document.createElement('div');
+   const name=document.createElement('strong');name.textContent=adminMode==='accounts'?(item.minecraft_username||'Compte sans pseudo'):(item.id.slice(0,8)+' — '+(item.status||''));
+   const sub=document.createElement('small');sub.textContent=adminMode==='accounts'?((item.email||'E-mail non disponible')+' · '+(item.suspended?'Compte suspendu':'Compte actif')):((item.buyer_email||'E-mail inconnu')+' · '+item.total_eur+' € · '+new Date(item.created_at).toLocaleDateString('fr-FR'));
+   info.append(name,sub);row.append(info);
+   if(adminMode==='accounts'){
+    const btn=document.createElement('button');btn.type='button';btn.className='btn ghost';btn.textContent=item.suspended?'Réactiver':'Suspendre';
+    btn.onclick=async()=>{if(!confirm((item.suspended?'Réactiver':'Suspendre')+' ce compte ?'))return;try{await adminRequest('accounts/'+encodeURIComponent(item.user_id)+'/suspension',{method:'POST',body:JSON.stringify({suspended:!item.suspended})});loadAdmin()}catch(e){status.textContent=e.message}};
+    row.append(btn);
+   }
+   box.append(row);
+  }
+ }catch(e){status.textContent=e.message}
+}
+const adminButton=document.getElementById('profileAdminBtn');
+if(adminButton)adminButton.onclick=()=>{document.getElementById('adminModal').classList.add('open');loadAdmin()};
+for(const [id,mode] of [['adminTabAccounts','accounts'],['adminTabOrders','orders']]){
+ const btn=document.getElementById(id);
+ if(btn)btn.onclick=()=>{adminMode=mode;document.getElementById('adminTabAccounts').classList.toggle('active',mode==='accounts');document.getElementById('adminTabOrders').classList.toggle('active',mode==='orders');loadAdmin()};
+}
+document.getElementById('adminRefresh')?.addEventListener('click',loadAdmin);
+document.querySelectorAll('[data-close="admin"]').forEach(el=>el.addEventListener('click',()=>document.getElementById('adminModal').classList.remove('open')));

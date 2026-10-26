@@ -1,0 +1,11 @@
+EclipseSMP V3.4 - Pack complet pour GitHub
+
+1. Decompresse ce ZIP sur ton PC.
+2. Ouvre ton depot GitHub EclipseSMP-Site a la racine.
+3. Add file > Upload files, et glisse LES FICHIERS ET DOSSIERS qui sont DANS ce ZIP (pas le ZIP lui-meme).
+4. Les noms deja presents seront remplaces apres Commit changes.
+5. Les chemins doivent etre directement index.html, script.js, style.css, backend/src/server.js, .github/workflows/eclipse-link.yml.
+6. Ensuite, dans Supabase SQL Editor, execute une seule fois backend/sql/04-admin-account-controls.sql.
+7. Les reglages Supabase Auth URL Configuration et Render FRONTEND_SITE_URL / ADMIN_USER_IDS restent necessaires.
+8. Les corrections devront etre testees; aucune vraie livraison d achat n est activee.
+9. Ne publie jamais de mots de passe ou de secrets dans GitHub.
