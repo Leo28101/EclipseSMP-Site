@@ -1,0 +1,37 @@
+
+name: Compiler EclipseLink (.jar)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "minecraft-plugin-source/**"
+      - ".github/workflows/eclipse-link.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperer les fichiers
+        uses: actions/checkout@v4
+
+      - name: Installer Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: minecraft-plugin-source/pom.xml
+
+      - name: Compiler EclipseLink
+        run: mvn -B -f minecraft-plugin-source/pom.xml clean package
+
+      - name: Publier le plugin JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: EclipseLink-Paper-1.21.11
+          path: minecraft-plugin-source/target/*.jar
+          if-no-files-found: error
