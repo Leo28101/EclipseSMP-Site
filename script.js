@@ -2,19 +2,6 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const toast=m=>{const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(window.__tt);window.__tt=setTimeout(()=>t.classList.remove("show"),2200)};
 // API Render: remplace seulement cette URL plus tard par ton vrai lien Render.
 const API_BASE="https://eclipsesmp-site.onrender.com/api"; // À remplacer par une URL de backend réelle. Aucun compte ni paiement actif sans backend.
-const TOKEN_KEY="eclipse_token";
-// La simple présence d'un jeton local n'autorise jamais un achat.
-let shopIdentity=null;
-function askShopLogin(){
-  toast(currentLang==="en"?"Log in with your verified Minecraft account first.":"Connecte-toi à ton compte Minecraft vérifié pour accéder à la boutique.");
-  toggleCart(false);
-  document.querySelector('[data-auth="login"]')?.click();
-  document.querySelector('#accountModal')?.classList.add('open');
-  refreshAccount();
-}
-function canShop(){if(shopIdentity?.linked)return true;askShopLogin();return false;}
-
-
 // background
 const space=$("#space"),ctx=space.getContext("2d");let stars=[];
 function resizeSpace(){const d=Math.min(devicePixelRatio,2);space.width=innerWidth*d;space.height=innerHeight*d;space.style.width=innerWidth+"px";space.style.height=innerHeight+"px";ctx.setTransform(d,0,0,d,0,0);stars=Array.from({length:Math.min(450,Math.floor(innerWidth*.34))},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:.25+Math.random()*1.4,a:.25+Math.random()*.65,p:Math.random()*6.28}))}resizeSpace();addEventListener("resize",resizeSpace);
@@ -169,7 +156,7 @@ function applyLanguage(lang){
   $("#langBtn").textContent=lang.toUpperCase();
   document.documentElement.lang=lang;
   $$(`[data-shop-${lang}]`).forEach(el=>el.textContent=el.getAttribute(`data-shop-${lang}`));
-  if(window.eclipseCartReady) { renderCrates();refreshCart(); }
+  if(window.eclipseCartReady) { renderCrates();refreshCart();refreshPurpose(); }
   $$("[data-i18n]").forEach(el=>{const k=el.dataset.i18n;if(translations[lang][k])el.textContent=translations[lang][k]});
   $$("[data-i18n-html]").forEach(el=>{const k=el.dataset.i18nHtml;if(translations[lang][k])el.innerHTML=translations[lang][k]});
 }
@@ -203,7 +190,6 @@ let chosenGrade=singleGrades.find(id=>basket[id]);if(chosenGrade)for(const id of
 function persistCart(){try{localStorage.setItem(cartKey,JSON.stringify(basket))}catch{}}
 function addCart(id){
  if(!products[id])return;
- if(!canShop())return;
  if(products[id].price===null){toast("Prix à confirmer : cet article n’est pas encore disponible.");return;}
  if(singleGrades.includes(id)){
   for(const grade of singleGrades)delete basket[grade];
@@ -214,26 +200,15 @@ function addCart(id){
  }else basket[id]=Math.min(99,(basket[id]||0)+1);
  persistCart();refreshCart();toast(currentLang==="en"?"Added to cart":"Ajouté au panier");
 }
-// Le choix achat/cadeau reste local tant que le backend /link n'est pas connecté.
-let orderPurpose="self";
+// Le pseudo désigne le destinataire, sans créer de compte.
 let giftRecipient="";
 function refreshPurpose(){
- const gift=orderPurpose==="gift";
- $("#cartBuySelf").classList.toggle("active",!gift);
- $("#cartGift").classList.toggle("active",gift);
- $("#cartBuySelf").setAttribute("aria-pressed",String(!gift));
- $("#cartGift").setAttribute("aria-pressed",String(gift));
- $("#cartGiftFields").hidden=!gift;
- $("#cartPurposeLabel").textContent=currentLang==="en"?"Who is this order for?":"À qui est destiné le panier ?";
- $("#cartBuySelf").textContent=currentLang==="en"?"🛍 Buy for myself":"🛍 Acheter pour moi";
- $("#cartGift").textContent=currentLang==="en"?"🎁 Send as gift":"🎁 Offrir";
- $("#cartGiftFields").querySelector("label").textContent=currentLang==="en"?"Recipient Minecraft username":"Pseudo Minecraft du destinataire";
- $("#cartGiftHelp").textContent=currentLang==="en"?"The recipient must be verified on the server before payment.":"Le compte du destinataire devra être vérifié sur le serveur avant tout paiement.";
- $("#cartPurposeNotice").textContent=gift?(currentLang==="en"?"Gift recipient is not verified yet — payment disabled.":"Destinataire non vérifié — paiement désactivé."):(currentLang==="en"?"Purchases will go to your verified Minecraft account after linking.":"Tes achats seront associés à ton compte Minecraft vérifié après connexion.");
+ const en=currentLang==="en";
+ $("#cartGiftFields").querySelector("label").textContent=en?"Minecraft username":"Pseudo Minecraft";
+ $("#cartGiftHelp").textContent=en?"Enter the exact in-game username, including the Bedrock prefix if applicable.":"Entre le pseudo exact en jeu, avec le préfixe Bedrock si nécessaire.";
+ $("#cartPurposeNotice").textContent=en?"No account needed. Check the recipient before continuing.":"Aucun compte nécessaire. Vérifie le destinataire avant de continuer.";
 }
-$("#cartBuySelf").addEventListener("click",()=>{orderPurpose="self";refreshPurpose()});
-$("#cartGift").addEventListener("click",()=>{orderPurpose="gift";refreshPurpose()});
-$("#cartRecipient").addEventListener("input",e=>{giftRecipient=e.target.value.trim()});
+$("#cartRecipient").addEventListener("input",e=>{giftRecipient=e.target.value.trim();e.target.setCustomValidity("");});
 const grid=$("#crateGrid"),modal=$("#crateModal"),cartModal=$("#cartModal");
 function renderCrates(){grid.innerHTML=["spawner","keyEclipse","keyNova"].map(id=>{const p=products[id];return `<article class="crate-card"><div class="ci">${p.icon}</div><h4>${p.name}</h4><div class="price">${p.price===null?(currentLang==="en"?"Price TBD":"Prix à confirmer"):money(p.price)}</div><p>${p.desc}</p><button type="button" data-product="${id}" ${p.price===null?'disabled title="Prix en attente de validation"':""}>${p.price===null?(currentLang==="en"?"Coming soon":"À confirmer"):(currentLang==="en"?"Add to cart":"Ajouter au panier")}</button></article>`}).join("");grid.querySelectorAll("button[data-product]").forEach(b=>b.addEventListener("click",()=>addCart(b.dataset.product)))}
 function refreshCart(){
@@ -241,25 +216,26 @@ function refreshCart(){
  const count=entries.reduce((n,[,q])=>n+q,0);const badge=$("#cartBadge");badge.textContent=count;badge.hidden=count===0;
  $("#cartLines").innerHTML=entries.length?entries.map(([id,q])=>{const p=products[id];return `<div class="cart-line"><div class="cart-line-icon">${p.icon}</div><div class="cart-line-main"><strong>${p.name}</strong><small>${p.price===null?"Prix à confirmer":money(p.price)+" / unité"}</small><div class="cart-quantity"><button type="button" data-cart-action="minus" data-id="${id}" aria-label="Retirer une unité">−</button><span>${q}</span>${singlePurchase.includes(id)?"":`<button type="button" data-cart-action="plus" data-id="${id}" aria-label="Ajouter une unité">+</button>`}</div></div><div class="cart-line-right"><strong>${p.price===null?"—":money(p.price*q)}</strong><button type="button" class="cart-delete" data-cart-action="delete" data-id="${id}" aria-label="Supprimer cet article">×</button></div></div>`}).join(""):`<div class="cart-empty"><span>✧</span><strong>${currentLang==="en"?"Your cart is empty":"Ton panier est vide"}</strong><p>${currentLang==="en"?"Add products from the shop":"Ajoute des produits depuis la boutique"}</p></div>`;
  $("#cartTotal").textContent=money(entries.reduce((t,[id,q])=>t+(products[id].price||0)*q,0));
- $("#cartCheckout").disabled=entries.length===0 || !shopIdentity?.linked;
- $("#cartCheckout").textContent=shopIdentity?.linked?"VÉRIFIER MA COMMANDE":"CONNEXION REQUISE";
+ $("#cartCheckout").disabled=entries.length===0;
+ $("#cartCheckout").textContent=currentLang==="en"?"REVIEW MY ORDER":"VÉRIFIER MA COMMANDE";
  $("#cartUnpriced").textContent=entries.some(([id])=>products[id].price===null)?(currentLang==="en"?"Some prices need confirmation.":"Certains prix restent à confirmer."):"";
- $("#cartLines").querySelectorAll("[data-cart-action]").forEach(el=>el.addEventListener("click",()=>{const {id,cartAction}=el.dataset;if(!canShop())return;if(cartAction==="plus")basket[id]=singlePurchase.includes(id)?1:Math.min(99,(basket[id]||0)+1);if(cartAction==="minus")basket[id]=(basket[id]||0)-1;if(cartAction==="delete"||basket[id]<=0)delete basket[id];persistCart();refreshCart()}));
+ $("#cartLines").querySelectorAll("[data-cart-action]").forEach(el=>el.addEventListener("click",()=>{const {id,cartAction}=el.dataset;if(cartAction==="plus")basket[id]=singlePurchase.includes(id)?1:Math.min(99,(basket[id]||0)+1);if(cartAction==="minus")basket[id]=(basket[id]||0)-1;if(cartAction==="delete"||basket[id]<=0)delete basket[id];persistCart();refreshCart()}));
 }
-function toggleCart(force){if(force!==false && !shopIdentity?.linked){askShopLogin();return;}const next=typeof force==="boolean"?force:!cartModal.classList.contains("open");cartModal.classList.toggle("open",next);cartModal.setAttribute("aria-hidden",String(!next));$("#openCart").setAttribute("aria-expanded",String(next));if(next){refreshCart();refreshPurpose()}}
+function toggleCart(force){const next=typeof force==="boolean"?force:!cartModal.classList.contains("open");cartModal.classList.toggle("open",next);cartModal.setAttribute("aria-hidden",String(!next));$("#openCart").setAttribute("aria-expanded",String(next));if(next){refreshCart();refreshPurpose()}}
 $("#openCart").onclick=()=>toggleCart();$("#closeCart").onclick=()=>toggleCart(false);
 document.addEventListener("pointerdown",e=>{if(cartModal.classList.contains("open")&&!cartModal.contains(e.target)&&!$("#openCart").contains(e.target))toggleCart(false)});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleCart(false)});
 $$(".rank .add-cart").forEach(b=>b.onclick=()=>addCart(b.dataset.product));
 $("#cartCheckout").onclick=()=>{
- if(!canShop())return;
  const entries=Object.entries(basket).filter(([id,q])=>q>0&&products[id]);
  if(!entries.length)return toast("Ton panier est vide.");
  if(entries.some(([id])=>products[id].price===null))return toast("Un prix doit être confirmé.");
- if(orderPurpose==="gift"&&!/^[.a-zA-Z0-9_ -]{3,32}$/.test(giftRecipient))return toast("Entre un pseudo Minecraft valide pour le cadeau.");
+ if(!/^(?:[A-Za-z0-9_]{3,16}|\.[A-Za-z0-9_ -]{1,16})$/.test(giftRecipient)){
+  const input=$("#cartRecipient");input.setCustomValidity(currentLang==="en"?"Enter your exact Minecraft username.":"Entre ton pseudo Minecraft exact (3 à 16 caractères, ou pseudo Bedrock préfixé par un point).");input.reportValidity();input.focus();return;
+ }
  const summary=entries.map(([id,n])=>`${products[id].name} × ${n}`).join(" · ");
  $("#orderReviewItems").textContent=summary;
- $("#orderReviewRecipient").textContent=orderPurpose==="gift"?`Cadeau pour ${giftRecipient}`:`Pour mon compte ${shopIdentity.minecraft_username}`;
+ $("#orderReviewRecipient").textContent=`${currentLang==="en"?"Recipient":"Destinataire"} : ${giftRecipient}`;
  $("#orderReviewTotal").textContent=money(entries.reduce((t,[id,n])=>t+products[id].price*n,0));
  $("#orderReviewAccept").checked=false;
  $("#orderReviewContinue").disabled=true;
@@ -271,7 +247,7 @@ $("#orderReviewAccept").onchange=e=>{$("#orderReviewContinue").disabled=!e.targe
 $("#orderReviewContinue").onclick=()=>toast("Paiements non activés : aucune commande n’a été passée.");
 $("#passInfo").onclick=()=>addCart("premium");
 $$ ("[data-extra-product]").forEach(b=>b.onclick=()=>addCart(b.dataset.extraProduct));
-window.eclipseCartReady=true;renderCrates();refreshCart();
+window.eclipseCartReady=true;renderCrates();refreshCart();refreshPurpose();
 
 // settings conserved
 const settings=$("#settings"),shade=$("#settingsShade");
@@ -279,119 +255,6 @@ $("#settingsBtn").onclick=()=>{settings.classList.add("open");shade.classList.ad
 function closeSet(){settings.classList.remove("open");shade.classList.remove("open")}
 $("#closeSettings").onclick=closeSet;shade.onclick=closeSet;
 $("#replay").onclick=()=>{closeSet();intro.classList.remove("done");intro.classList.remove("running");state="idle";exploded=false;$("#introCopy").style.pointerEvents=""};
-
-// ACCOUNT BACKEND
-const acc=$("#accountModal");
-$("#accountBtn").onclick=()=>{acc.classList.add("open");refreshAccount()};
-$$('[data-close="account"]').forEach(b=>b.onclick=()=>acc.classList.remove("open"));
-$$(".auth-tab").forEach(b=>b.onclick=()=>{$$(".auth-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("#loginForm").classList.toggle("hidden",b.dataset.auth!=="login");$("#registerForm").classList.toggle("hidden",b.dataset.auth!=="register")});
-
-// Inscription vérifiée d'abord en jeu. Aucun e-mail ou mot de passe n'est demandé avant /link.
-let signupTicket=null;
-let registrationPoller=null;
-let pendingConfirmationEmail="";
-function stopRegistrationPoll(){if(registrationPoller){clearInterval(registrationPoller);registrationPoller=null}}
-function setRegistrationStep(n){
- ["registrationStart","registrationVerify","registrationFinish"].forEach((id,i)=>$("#"+id).classList.toggle("hidden",i!==n));
- ["regStepOne","regStepTwo","regStepThree"].forEach((id,i)=>$("#"+id).classList.toggle("step-current",i===n));
-}
-async function signupApi(path,body){
- const r=await fetch(`${API_BASE}${path}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
- const d=await r.json();if(!r.ok)throw Error(d.error||"Service indisponible");return d;
-}
-$("#registrationGenerate").onclick=async()=>{
- const status=$("#registerStatus");status.textContent="";
- const name=$("#registerMinecraft").value.trim();
- if(!/^[.a-zA-Z0-9_ -]{3,32}$/.test(name)){status.textContent="Pseudo invalide : utilise ton pseudo exact en jeu.";return}
- try{
-  const d=await signupApi('/signup/start',{minecraftUsername:name});signupTicket=d.ticket;
-  $("#registrationCommand").textContent=d.command;setRegistrationStep(1);
-  stopRegistrationPoll();registrationPoller=setInterval(()=>{if(signupTicket&&!document.getElementById("registrationVerify").classList.contains("hidden"))checkMinecraftVerified(true)},3000);
-  status.textContent="Code généré. Exécute la commande depuis ton compte Minecraft.";
- }catch(e){status.textContent=e.message}
-};
-$("#registrationCopy").onclick=()=>{navigator.clipboard?.writeText($("#registrationCommand").textContent).then(()=>{$("#registerStatus").textContent="Commande copiée !"}).catch(()=>{$("#registerStatus").textContent="Sélectionne la commande pour la copier."})};
-$("#registrationRestart").onclick=()=>{stopRegistrationPoll();signupTicket=null;setRegistrationStep(0);$("#registerStatus").textContent=""};
-let checkingMinecraft=false;
-async function checkMinecraftVerified(quiet=false){
- if(!signupTicket||checkingMinecraft)return;
- checkingMinecraft=true;const status=$("#registerStatus");
- try{
-  const d=await signupApi('/signup/status',{ticket:signupTicket});
-  if(!d.verified){if(!quiet)status.textContent="En attente de /link…";return}
-  stopRegistrationPoll();
-  $("#registrationVerifiedName").textContent=`✓ Minecraft vérifié : ${d.minecraftUsername}`;
-  setRegistrationStep(2);status.textContent="Minecraft confirmé ! Termine la création de ton compte.";
- }catch(e){if(!quiet)status.textContent=e.message}
- finally{checkingMinecraft=false}
-}
-$("#registrationCheck").onclick=()=>checkMinecraftVerified(false);
-addEventListener('focus',()=>{if(signupTicket&&!$("#registrationVerify").classList.contains('hidden'))checkMinecraftVerified(true)});
-$("#registrationFinish").onsubmit=async e=>{
- e.preventDefault();const status=$("#registerStatus"),p=$("#registerPassword").value;
- if(p!==$("#registerPassword2").value){status.textContent="Les mots de passe ne correspondent pas.";return}
- try{
-  const email=$("#registerEmail").value.trim();
-  await signupApi('/auth/register',{ticket:signupTicket,email,password:p});
-  stopRegistrationPoll();signupTicket=null;pendingConfirmationEmail=email;
-  $("#registrationFinish").classList.add('hidden');
-  $("#registrationEmailNotice").classList.remove('hidden');
-  status.textContent="Inscription enregistrée. Consulte ton e-mail pour confirmer ton compte.";
-  $("#registrationFinish").querySelectorAll('input').forEach(i=>i.value='');
- }catch(err){status.textContent=err.message}
-};
-
-$("#loginForm").onsubmit=async e=>{
- e.preventDefault();const s=$("#loginStatus");
- try{
-  const r=await fetch(`${API_BASE}/auth/login`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("#loginEmail").value.trim(),password:$("#loginPassword").value})});
-  const d=await r.json();if(!r.ok)throw new Error(d.error||"Erreur");
-  localStorage.setItem(TOKEN_KEY,d.token);if(d.refresh_token)localStorage.setItem("eclipse_refresh_token",d.refresh_token);s.textContent="Connexion réussie.";await refreshAccount();
- }catch(err){s.textContent=err.message==="Failed to fetch"?"Le backend Render n'est pas encore connecté.":err.message}
-};
-
-// Les skins sont purement visuels ; seule la réponse authentifiée de /api/me
-// décide du compte lié et de l'accès à la boutique.
-function setAccountSkin(data){
- const navImg=document.getElementById('accountBtnSkin');
- const navFallback=document.getElementById('accountBtnFallback');
- const profileImg=document.getElementById('profileSkin');
- const profileFallback=document.getElementById('profileSkinFallback');
- const uuid=(data?.minecraft_uuid||'').replace(/-/g,'');
- const username=String(data?.minecraft_username||'');
- const identifier=/^[0-9a-f]{32}$/i.test(uuid)?uuid:(/^[.a-zA-Z0-9_]{3,32}$/.test(username)?username:null);
- if(!identifier){
-  navImg.classList.add('hidden');navImg.removeAttribute('src');navFallback.classList.remove('hidden');
-  profileImg.classList.add('hidden');profileImg.removeAttribute('src');profileFallback.classList.remove('hidden');
-  return;
- }
- const url='https://mc-heads.net/avatar/'+encodeURIComponent(identifier)+'/128';
- navImg.onerror=()=>{navImg.classList.add('hidden');navFallback.classList.remove('hidden')};
- profileImg.onerror=()=>{profileImg.classList.add('hidden');profileFallback.classList.remove('hidden')};
- navImg.src=url;profileImg.src=url;
- navImg.classList.remove('hidden');profileImg.classList.remove('hidden');
- navFallback.classList.add('hidden');profileFallback.classList.add('hidden');
-}
-async function refreshAccount(){
- shopIdentity=null;
- const token=localStorage.getItem(TOKEN_KEY),auth=$("#authArea"),profile=$("#profileArea");
- auth.classList.toggle("hidden",!!token);profile.classList.toggle("hidden",!token);
- if(!token){setAccountSkin(null);refreshCart();return;}
- try{
-  const r=await fetch(`${API_BASE}/me`,{headers:{Authorization:`Bearer ${token}`}});
-  const d=await r.json();if(!r.ok)throw new Error();
-  shopIdentity=d.linked?d:null;refreshCart();
-  setAccountSkin(d.linked?d:null);
-  $("#profileEmail").textContent=d.email||"—";
-  $("#profileMinecraft").textContent=d.minecraft_username||"Non lié";
-  $("#profileLinkedStatus").textContent=d.linked?"✓ Minecraft lié":"⚠ Compte Minecraft non lié";
-  $("#profileName").textContent=d.minecraft_username||d.email;
-  const adminBtn=document.getElementById('profileAdminBtn');
-  if(adminBtn)adminBtn.classList.toggle('hidden',!d.isAdmin);
- }catch{shopIdentity=null;setAccountSkin(null);refreshCart();localStorage.removeItem(TOKEN_KEY);auth.classList.remove("hidden");profile.classList.add("hidden")}
-}
-$("#profileRefresh").onclick=()=>refreshAccount();
-$("#logoutBtn").onclick=()=>{shopIdentity=null;basket={};persistCart();refreshCart();localStorage.removeItem(TOKEN_KEY);localStorage.removeItem("eclipse_refresh_token");refreshAccount()};
 
 // SCORE TABLE
 let currentScore="money";
@@ -412,79 +275,3 @@ const reduced=$("#reduceMotion");
 reduced.checked=localStorage.getItem('eclipse_reduced_motion')==='1';
 function setReducedMotion(on){document.documentElement.classList.toggle('reduced-motion',on);localStorage.setItem('eclipse_reduced_motion',on?'1':'0')}
 setReducedMotion(reduced.checked);reduced.addEventListener('change',()=>setReducedMotion(reduced.checked));
-$("#forgotPassword").onclick=()=>{$("#loginForm").classList.add('hidden');$("#registerForm").classList.add('hidden');$("#resetHelp").classList.remove('hidden');};
-$("#resetBack").onclick=()=>{$("#resetHelp").classList.add('hidden');$("#loginForm").classList.remove('hidden')};
-
-// Après confirmation e-mail, Supabase redirige vers la page publique.
-// La confirmation se fait côté Supabase, puis le joueur se connecte normalement.
-const confirmParams=new URLSearchParams(location.hash.replace(/^#/,''));
-const confirmQuery=new URLSearchParams(location.search);
-if((confirmParams.get('type')==='signup'||confirmQuery.get('confirmed')==='1')&&!confirmParams.get('error')){
- document.querySelector('#accountModal')?.classList.add('open');
- document.querySelector('[data-auth="login"]')?.click();
- document.getElementById('loginStatus').textContent='E-mail confirmé. Connecte-toi avec ton adresse et ton mot de passe.';
- history.replaceState({},'',location.pathname);
-}
-if(confirmParams.get('error')||confirmQuery.get('error')){
- document.querySelector('#accountModal')?.classList.add('open');
- document.getElementById('loginStatus').textContent='Lien expiré ou invalide. Tu peux demander un nouvel e-mail de confirmation.';
-}
-const resendBtn=document.getElementById('resendSignupEmail');
-if(resendBtn)resendBtn.onclick=async()=>{
- const msg=document.getElementById('resendSignupStatus');
- try{const d=await eclipseRequest('/auth/resend-confirmation',null,{email:pendingConfirmationEmail});msg.textContent=d.message}
- catch(e){msg.textContent=e.message}
-};
-// New account linking and recovery UI. Supabase confirmation links use the configured Site URL.
-async function eclipseRequest(path,token,body){const r=await fetch(`${API_BASE}${path}`,{method:'POST',headers:{'Content-Type':'application/json',...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify(body||{})});const d=await r.json();if(!r.ok)throw Error(d.error||'Requête impossible');return d}
-const requestCode=document.getElementById('requestLinkCode');
-if(requestCode)requestCode.onclick=async()=>{const status=document.getElementById('linkStatus');try{const d=await eclipseRequest('/link/request',localStorage.getItem(TOKEN_KEY));status.textContent=`Dans Minecraft, tape : ${d.command} (valable 10 minutes)`}catch(e){status.textContent=e.message}};
-const forgotSend=document.getElementById('sendRecovery');
-if(forgotSend)forgotSend.onclick=async()=>{const status=document.getElementById('resetStatus');try{const d=await eclipseRequest('/auth/forgot',null,{email:document.getElementById('recoveryEmail').value.trim()});status.textContent=d.message}catch(e){status.textContent=e.message}};
-const hashParams=new URLSearchParams(location.hash.replace(/^#/,''));
-if(hashParams.get('access_token')&&hashParams.get('type')==='recovery'){
- localStorage.setItem(TOKEN_KEY,hashParams.get('access_token'));history.replaceState({},'',location.pathname+location.search);document.getElementById('accountModal')?.classList.add('open');document.getElementById('resetHelp')?.classList.remove('hidden');document.getElementById('authArea')?.classList.remove('hidden');document.getElementById('profileArea')?.classList.add('hidden');document.getElementById('loginForm')?.classList.add('hidden');document.getElementById('registerForm')?.classList.add('hidden');document.getElementById('newPasswordBox')?.classList.remove('hidden');
-}
-const resetSubmit=document.getElementById('changeRecoveredPassword');if(resetSubmit)resetSubmit.onclick=async()=>{const status=document.getElementById('resetStatus');try{await eclipseRequest('/auth/update-password',localStorage.getItem(TOKEN_KEY),{password:document.getElementById('recoveredPassword').value});status.textContent='Mot de passe modifié.'}catch(e){status.textContent=e.message}};
-
-// Le backend /api/checkout vérifie lui aussi la session et n’accepte aucun paiement sans prestataire configuré.
-addEventListener("focus",()=>{if(localStorage.getItem(TOKEN_KEY))refreshAccount()});
-
-// Restore a verified account after a page refresh.
-if(localStorage.getItem(TOKEN_KEY))refreshAccount();
-
-// Console d'administration : toutes les données sont protégées par l'API côté serveur.
-let adminMode='accounts';
-async function adminRequest(path,options={}){
- const r=await fetch(API_BASE+'/admin/'+path,{...options,headers:{Authorization:'Bearer '+localStorage.getItem(TOKEN_KEY),'Content-Type':'application/json',...(options.headers||{})}});
- const d=await r.json();if(!r.ok)throw Error(d.error||'Accès refusé');return d;
-}
-async function loadAdmin(){
- const box=document.getElementById('adminRows'),status=document.getElementById('adminStatus');
- box.replaceChildren();status.textContent='Chargement…';
- try{
-  const d=await adminRequest(adminMode==='accounts'?'accounts':'orders');status.textContent='';
-  if(!d.items.length){box.textContent='Aucune donnée pour le moment.';return}
-  for(const item of d.items){
-   const row=document.createElement('div');row.className='admin-row';
-   const info=document.createElement('div');
-   const name=document.createElement('strong');name.textContent=adminMode==='accounts'?(item.minecraft_username||'Compte sans pseudo'):(item.id.slice(0,8)+' — '+(item.status||''));
-   const sub=document.createElement('small');sub.textContent=adminMode==='accounts'?((item.email||'E-mail non disponible')+' · '+(item.suspended?'Compte suspendu':'Compte actif')):((item.buyer_email||'E-mail inconnu')+' · '+item.total_eur+' € · '+new Date(item.created_at).toLocaleDateString('fr-FR'));
-   info.append(name,sub);row.append(info);
-   if(adminMode==='accounts'){
-    const btn=document.createElement('button');btn.type='button';btn.className='btn ghost';btn.textContent=item.suspended?'Réactiver':'Suspendre';
-    btn.onclick=async()=>{if(!confirm((item.suspended?'Réactiver':'Suspendre')+' ce compte ?'))return;try{await adminRequest('accounts/'+encodeURIComponent(item.user_id)+'/suspension',{method:'POST',body:JSON.stringify({suspended:!item.suspended})});loadAdmin()}catch(e){status.textContent=e.message}};
-    row.append(btn);
-   }
-   box.append(row);
-  }
- }catch(e){status.textContent=e.message}
-}
-const adminButton=document.getElementById('profileAdminBtn');
-if(adminButton)adminButton.onclick=()=>{document.getElementById('adminModal').classList.add('open');loadAdmin()};
-for(const [id,mode] of [['adminTabAccounts','accounts'],['adminTabOrders','orders']]){
- const btn=document.getElementById(id);
- if(btn)btn.onclick=()=>{adminMode=mode;document.getElementById('adminTabAccounts').classList.toggle('active',mode==='accounts');document.getElementById('adminTabOrders').classList.toggle('active',mode==='orders');loadAdmin()};
-}
-document.getElementById('adminRefresh')?.addEventListener('click',loadAdmin);
-document.querySelectorAll('[data-close="admin"]').forEach(el=>el.addEventListener('click',()=>document.getElementById('adminModal').classList.remove('open')));

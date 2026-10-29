@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#05030c">
   <title>EclipseSMP — V2</title>
-  <link rel="stylesheet" href="style.css?v=34">
+  <link rel="stylesheet" href="style.css?v=35">
 </head>
 <body>
   <audio id="ambient" src="ambient.mp3" loop preload="auto"></audio>
@@ -37,7 +37,7 @@
     <div class="actions">
       <button id="langBtn" class="langbtn" title="Langue / Language">FR</button>
       <button id="openCart" class="iconbtn nav-cart" type="button" aria-label="Ouvrir le panier" aria-expanded="false" title="Panier"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.5 13h12l2.5-9H6"/></svg><span id="cartBadge" class="cart-badge" hidden>0</span></button>
-      <button id="accountBtn" class="iconbtn account-nav-btn" type="button" title="Connexion / Mon compte" aria-label="Connexion / Mon compte"><span id="accountBtnFallback">👤</span><img id="accountBtnSkin" class="hidden" alt="Skin Minecraft du compte connecté" referrerpolicy="no-referrer"></button>
+
       <button id="soundBtn" class="iconbtn" title="Musique">🔇</button>
       <button id="settingsBtn" class="iconbtn" title="Paramètres">⚙</button>
     </div>
@@ -118,7 +118,7 @@
 
     <section id="services" class="section">
       <div class="section-head reveal"><small>SERVICES</small><h3>Une seconde <span>chance.</span></h3></div>
-      <p class="shop-subtitle">Ces services nécessitent la vérification de ton compte et la validation des conditions par le staff. Aucun débanissement ou démute automatique n'est actif pour le moment.</p>
+      <p class="shop-subtitle">Ces services nécessitent la validation des conditions par le staff. Aucun débanissement ou démute automatique n'est actif pour le moment.</p>
       <div class="ranks">
         <article class="rank reveal"><div class="rank-top"><span>UNBAN</span><b>7,00 €</b></div><p>Demande de débanissement, selon les conditions du serveur.</p><button type="button" class="add-cart" data-extra-product="unban">Ajouter au panier</button></article>
         <article class="rank reveal"><div class="rank-top"><span>UNMUTE</span><b>2,00 €</b></div><p>Demande de retrait de mute, selon les conditions du serveur.</p><button type="button" class="add-cart" data-extra-product="unmute">Ajouter au panier</button></article>
@@ -161,12 +161,10 @@
     <div class="cart-popover-head"><div><small>ECLIPSESMP STORE</small><h3 data-shop-fr="Mon panier" data-shop-en="My cart">Mon panier</h3></div><button id="closeCart" class="cart-popover-close" type="button" aria-label="Fermer le panier">×</button></div>
     <div class="cart-scroll"><div id="cartLines" class="cart-lines"></div></div>
     <div class="cart-popover-bottom">
-      <div class="cart-purpose" role="group" aria-label="Destination de la commande">
-        <span class="cart-purpose-label" id="cartPurposeLabel">À qui est destiné le panier ?</span>
-        <div class="cart-purpose-buttons"><button type="button" id="cartBuySelf" class="active" aria-pressed="true">🛍 Acheter pour moi</button><button type="button" id="cartGift" aria-pressed="false">🎁 Offrir</button></div>
-        <div id="cartGiftFields" class="cart-gift-fields" hidden><label for="cartRecipient">Pseudo Minecraft du destinataire</label><input id="cartRecipient" maxlength="16" spellcheck="false" autocomplete="off" placeholder="Pseudo Minecraft"/><p id="cartGiftHelp">Le compte du destinataire devra être vérifié sur le serveur avant tout paiement.</p></div>
-        <p id="cartPurposeNotice" class="cart-purpose-notice">Tes achats seront associés à ton compte Minecraft vérifié après connexion.</p>
-      </div><div class="cart-total"><span data-shop-fr="Total" data-shop-en="Total">Total</span><strong id="cartTotal">0,00 €</strong></div><p id="cartUnpriced" class="shop-subtitle"></p><button id="cartCheckout" type="button" class="btn primary full" disabled>CONNEXION REQUISE</button><p class="cart-hint" data-shop-fr="Aucun paiement n’est encore possible." data-shop-en="Payments are not available yet.">Aucun paiement n’est encore possible.</p></div>
+      <div class="cart-purpose" role="group" aria-label="Destinataire de la commande">
+        <div id="cartGiftFields" class="cart-gift-fields"><label for="cartRecipient">Pseudo Minecraft</label><input id="cartRecipient" maxlength="17" spellcheck="false" autocomplete="off" placeholder="Ton pseudo exact en jeu" required/><p id="cartGiftHelp">Entre le pseudo exact en jeu, avec le préfixe Bedrock si nécessaire.</p></div>
+        <p id="cartPurposeNotice" class="cart-purpose-notice">Aucun compte nécessaire. Vérifie le destinataire avant de continuer.</p>
+      </div><div class="cart-total"><span data-shop-fr="Total" data-shop-en="Total">Total</span><strong id="cartTotal">0,00 €</strong></div><p id="cartUnpriced" class="shop-subtitle"></p><button id="cartCheckout" type="button" class="btn primary full" disabled>VÉRIFIER MA COMMANDE</button><p class="cart-hint" data-shop-fr="Aucun paiement n’est encore possible." data-shop-en="Payments are not available yet.">Aucun paiement n’est encore possible.</p></div>
   </div>
 
   <!-- Vérification explicite avant toute tentative de commande. Aucun débit possible. -->
@@ -184,70 +182,6 @@
     </div>
   </div>
 
-  <!-- COMPTE: remplacé uniquement ici -->
-  <div id="accountModal" class="modal">
-    <div class="shade" data-close="account"></div>
-    <div class="modal-card">
-      <button class="close" data-close="account">×</button>
-
-      <div id="authArea">
-        <div class="account-logo">◐</div>
-        <small>ECLIPSESMP ID</small>
-        <h3>Compte EclipseSMP</h3>
-        <div class="auth-tabs">
-          <button class="auth-tab active" data-auth="login" data-i18n="login">Connexion</button>
-          <button class="auth-tab" data-auth="register" data-i18n="register">Créer un compte</button>
-        </div>
-
-        <form id="loginForm" class="auth-form">
-          <label>Email<input id="loginEmail" type="email" required></label>
-          <label>Mot de passe<input id="loginPassword" type="password" required></label>
-          <button class="btn primary full" type="submit" data-i18n="login_btn">SE CONNECTER</button><button type="button" id="forgotPassword" class="text-action">Mot de passe oublié ?</button>
-          <p id="loginStatus" class="status"></p>
-        </form>
-
-        <div id="registerForm" class="auth-form hidden">
-          <div class="eclipse-steps"><span class="step-current" id="regStepOne">1 · Pseudo</span><span id="regStepTwo">2 · /link</span><span id="regStepThree">3 · Compte</span></div>
-          <section id="registrationStart">
-            <p class="register-hint">Pour créer ton compte, vérifie d’abord ton identité sur notre serveur Minecraft (Java Premium, Java non-premium ou Bedrock).</p>
-            <label>Pseudo Minecraft<input id="registerMinecraft" type="text" minlength="3" maxlength="32" autocomplete="off" placeholder="Ton pseudo exact" required></label>
-            <button type="button" class="btn primary full" id="registrationGenerate">GÉNÉRER MON CODE</button>
-          </section>
-          <section id="registrationVerify" class="hidden">
-            <p class="register-hint">Connecte-toi sur EclipseSMP et exécute cette commande dans le chat :</p>
-            <div class="reg-command"><code id="registrationCommand">/link 000000</code><button type="button" id="registrationCopy">Copier</button></div>
-            <p class="register-hint">Code valable 10 minutes et utilisable une seule fois. <strong>Attente de confirmation depuis Minecraft…</strong></p>
-            <button type="button" class="btn primary full" id="registrationCheck">J'AI TAPÉ /LINK — VÉRIFIER</button>
-            <button type="button" class="text-action" id="registrationRestart">Changer de pseudo</button>
-          </section>
-          <form id="registrationFinish" class="hidden">
-            <p class="register-verified" id="registrationVerifiedName">✓ Minecraft vérifié</p>
-            <label>E-mail<input id="registerEmail" type="email" autocomplete="email" required></label>
-            <label>Mot de passe<input id="registerPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
-            <label>Confirmer le mot de passe<input id="registerPassword2" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></label>
-            <button class="btn primary full" type="submit">CRÉER MON COMPTE</button>
-          </form>
-          <p id="registerStatus" class="status" role="status" aria-live="polite"></p>
-          <div id="registrationEmailNotice" class="registration-email-notice hidden"><strong>📩 Confirme ton adresse e-mail</strong><p>Nous avons demandé l'envoi d'un lien de validation. Ouvre l'e-mail, clique sur le lien, puis reviens te connecter. Pense à vérifier les spams.</p><button type="button" id="resendSignupEmail" class="btn ghost full">RENVOYER L'E-MAIL</button><p id="resendSignupStatus" class="status"></p></div>
-        </div>
-        <div id="resetHelp" class="reset-help hidden"><h4>Réinitialisation du mot de passe</h4><p>Entre ton e-mail pour demander un lien de récupération sécurisé.</p><label>Adresse e-mail<input type="email" id="recoveryEmail" placeholder="ton@email.fr"></label><button type="button" class="btn primary full" id="sendRecovery">ENVOYER UN LIEN</button><p id="resetStatus" class="status"></p><div id="newPasswordBox" class="hidden"><label>Nouveau mot de passe<input type="password" id="recoveredPassword" minlength="8"></label><button type="button" class="btn primary full" id="changeRecoveredPassword">CHANGER LE MOT DE PASSE</button></div><button type="button" class="btn ghost full" id="resetBack">Retour à la connexion</button></div>
-      </div>
-
-      <div id="profileArea" class="hidden">
-        <div class="eclipse-profile-banner"><span>✦ ECLIPSESMP ID</span><span class="eclipse-profile-live">● COMPTE CONNECTÉ</span></div>
-        <div class="eclipse-profile-hero">
-          <div class="eclipse-profile-skin"><img id="profileSkin" alt="Tête du skin Minecraft" referrerpolicy="no-referrer"><span id="profileSkinFallback">◐</span></div>
-          <div><small>MON ESPACE PERSONNEL</small><h3 id="profileName">Joueur</h3><span id="profileLinkedStatus" class="eclipse-profile-link">Vérification en cours…</span></div>
-        </div>
-        <div class="eclipse-profile-info"><div><span>PSEUDO MINECRAFT</span><b id="profileMinecraft">—</b></div><div><span>ADRESSE E-MAIL (PRIVÉE)</span><b id="profileEmail">—</b></div></div>
-        <div class="account-security-note">🔐 Tes données de connexion restent privées. Ton profil Minecraft et ton adresse e-mail sont visibles ici uniquement par toi.</div>
-        <button type="button" id="profileAdminBtn" class="btn ghost full hidden">⚙ Administration EclipseSMP</button>
-        <div style="margin:18px 0;display:grid;gap:10px"><button id="requestLinkCode" class="btn primary full" type="button">LIER MON COMPTE MINECRAFT</button><p id="linkStatus" class="status" style="overflow-wrap:anywhere"></p></div><button id="profileRefresh" class="btn ghost full" type="button">↻ ACTUALISER MES INFORMATIONS</button><button id="logoutBtn" class="btn ghost full" data-i18n="logout">SE DÉCONNECTER</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="adminModal" class="modal"><div class="shade" data-close="admin"></div><div class="modal-card admin-panel"><button class="close" data-close="admin">×</button><small>ECLIPSESMP • ACCÈS RÉSERVÉ</small><h3>Administration</h3><p class="register-hint">Comptes et achats. Les mots de passe ne sont jamais visibles, même pour le fondateur.</p><div class="auth-tabs"><button type="button" class="auth-tab active" id="adminTabAccounts">Comptes</button><button type="button" class="auth-tab" id="adminTabOrders">Achats</button></div><p id="adminStatus" class="status"></p><div id="adminRows" class="admin-rows"></div><button id="adminRefresh" type="button" class="btn ghost full">↻ Actualiser</button></div></div>
   <!-- SETTINGS conservés, sauf Microsoft Client ID retiré -->
   <aside id="settings" class="settings">
     <div class="settings-head"><div><small>ECLIPSESMP</small><h3>Paramètres</h3></div><button id="closeSettings" class="close static">×</button></div>
@@ -258,6 +192,6 @@
 
   <div id="settingsShade" class="settings-shade"></div>
   <div id="toast" class="toast"></div>
-  <script src="script.js?v=34"></script>
+  <script src="script.js?v=35"></script>
 </body>
 </html>

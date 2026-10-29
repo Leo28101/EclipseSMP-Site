@@ -1,0 +1,17 @@
+MISE À JOUR DU SITE COMPLET — SANS COMPTE
+
+Ce dossier contient tous les fichiers du ZIP fourni, avec index.html et script.js mis à jour.
+
+INSTALLATION
+1. Décompresse le ZIP.
+2. Ouvre le dossier EclipseSMP-Site-main.
+3. Sur GitHub, ouvre Leo28101/EclipseSMP-Site puis Add file > Upload files.
+4. Envoie le CONTENU du dossier, pas le dossier parent lui-même, et valide Commit changes.
+5. Attends la publication GitHub Pages, puis recharge avec Ctrl + F5.
+
+FONCTIONNEMENT
+Les visiteurs peuvent ajouter des articles au panier sans inscription, connexion, mot de passe ni /link. Le panier demande le pseudo Minecraft avant le récapitulatif.
+Les paiements restent désactivés : aucun achat réel ni livraison ne peut encore avoir lieu.
+Les classements restent à synchroniser avec Minecraft et /vote reste à configurer.
+
+Les fichiers backend, SQL et sources du plugin existants sont conservés. Cette mise à jour retire les comptes du parcours du site ; elle ne supprime pas les comptes ou tables déjà présents dans Supabase.
