@@ -259,15 +259,36 @@ $("#replay").onclick=()=>{closeSet();intro.classList.remove("done");intro.classL
 // SCORE TABLE
 let currentScore="money";
 const safeText=value=>String(value??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
-function renderScore(rows){
+// The API returns playtime in seconds. Only presentation is abbreviated.
+function formatScoreValue(value,type=currentScore){
+ if(value===null||value===undefined||value==='')return '—';
+ const n=Number(value);
+ if(!Number.isFinite(n)||n<0)return '—';
+ if(type==='playtime'){
+  const minutes=Math.floor(n/60);
+  return Math.floor(minutes/60)+'h '+String(minutes%60).padStart(2,'0')+'m';
+ }
+ if(type==='money'||type==='shards'){
+  const suffixes=['','k','M','B','T'];
+  let level=0;
+  while(level<suffixes.length-1&&n>=1000**(level+1))level++;
+  let scaled=n/1000**level;
+  if(level>0&&Math.round(scaled*10)/10>=1000&&level<suffixes.length-1){level++;scaled=n/1000**level;}
+  return scaled.toLocaleString(currentLang==='en'?'en-GB':'fr-FR',{maximumFractionDigits:level?1:0,useGrouping:!level})+suffixes[level];
+ }
+ return Math.floor(n).toLocaleString(currentLang==='en'?'en-GB':'fr-FR');
+}
+function renderScore(rows,type=currentScore){
  const filtered=rows.filter(x=>!['rip282528','david7277219'].includes(String(x.minecraft_username||x.username||'').toLowerCase())).slice(0,10);
- $("#scoreRows").innerHTML=filtered.length?filtered.map((x,i)=>`<div class="score-row"><span class="place">${String(i+1).padStart(2,'0')}</span><span class="score-player">${safeText(x.minecraft_username||x.username||'Joueur')}</span><span><b class="score-grade">${safeText(x.rank_name||'—')}</b></span><span class="score-value">${safeText(x.value??'—')}</span></div>`).join(''):'<div class="score-unavailable">Aucun classement disponible pour le moment.</div>';
+ $("#scoreRows").innerHTML=filtered.length?filtered.map((x,i)=>`<div class="score-row"><span class="place">${String(i+1).padStart(2,'0')}</span><span class="score-player">${safeText(x.minecraft_username||x.username||'Joueur')}</span><span><b class="score-grade">${safeText(x.rank_name||'—')}</b></span><span class="score-value">${safeText(formatScoreValue(x.value,type))}</span></div>`).join(''):'<div class="score-unavailable">Aucun classement disponible pour le moment.</div>';
  $("#scoreStatus").textContent=filtered.length?"Classement synchronisé avec le serveur.":"Aucune statistique synchronisée pour le moment.";
 }
+let scoreRequestId=0;
 async function loadScore(){
+ const requestId=++scoreRequestId,type=currentScore;
  $("#scoreRows").innerHTML='<div class="score-unavailable">Chargement des statistiques…</div>';
  if(API_BASE.includes('TON-API')){$("#scoreRows").innerHTML='<div class="score-unavailable">🌌 Connexion au serveur indisponible</div>';$("#scoreStatus").textContent='L’API de statistiques doit encore être connectée.';return}
- try{const r=await fetch(`${API_BASE}/leaderboard?type=${encodeURIComponent(currentScore)}`,{signal:AbortSignal.timeout(4500)});if(!r.ok)throw new Error();const data=await r.json();if(!Array.isArray(data))throw new Error();renderScore(data)}catch{$("#scoreRows").innerHTML='<div class="score-unavailable">🌌 Connexion au serveur indisponible</div>';$("#scoreStatus").textContent='Impossible de récupérer des données réelles.'}
+ try{const r=await fetch(`${API_BASE}/leaderboard?type=${encodeURIComponent(type)}`,{signal:AbortSignal.timeout(90000)});if(!r.ok)throw new Error();const data=await r.json();if(!Array.isArray(data))throw new Error();if(requestId!==scoreRequestId)return;renderScore(data,type)}catch{if(requestId!==scoreRequestId)return;$("#scoreRows").innerHTML='<div class="score-unavailable">🌌 Connexion au serveur indisponible</div>';$("#scoreStatus").textContent='Impossible de récupérer des données réelles.'}
 }
 $$(".score-tab").forEach(b=>b.onclick=()=>{$$(".score-tab").forEach(x=>x.classList.remove("active"));b.classList.add("active");currentScore=b.dataset.score;loadScore()});
 loadScore();
@@ -275,3 +296,4 @@ const reduced=$("#reduceMotion");
 reduced.checked=localStorage.getItem('eclipse_reduced_motion')==='1';
 function setReducedMotion(on){document.documentElement.classList.toggle('reduced-motion',on);localStorage.setItem('eclipse_reduced_motion',on?'1':'0')}
 setReducedMotion(reduced.checked);reduced.addEventListener('change',()=>setReducedMotion(reduced.checked));
+
